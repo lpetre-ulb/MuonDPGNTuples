@@ -9,19 +9,45 @@ You may want to use a specific CMSSW  version (from now on referred as CMSSW_XXX
 - For **P5 data** check  [Global Tags for Conditions Data ](https://twiki.cern.ch/twiki/bin/view/CMSPublic/SWGuideFrontierConditions)
 - For **MC data** check the production parameters
 
-```
+```bash
 cmsrel CMSSW_XXXX 
 cd CMSSW_XXXX/src/ 
 cmsenv
+```
 
-git clone git@github.com:gmilella12/MuonDPGNTuples.git MuDPGAnalysis/MuonDPGNtuples
+---
+### CSC segment reconstruction and ME1/1 propagation
+
+The following two lines are needed to add the plugin for the CSC segment reconstruction.
+**Important**: Please run them *before* cloning the MuonDPGNtuples repository:
+```bash
+git cms-init
+git cms-addpkg RecoLocalMuon/CSCSegment
+```
+
+Then edit the file `src/RecoLocalMuon/CSCSegment/BuildFile.xml` and replace the line:
+```
+<!--flags EDM_PLUGIN="1"/-->
+```
+with
+```
+<export>
+   <lib name="1"/>
+</export>
+```
+You can now go on with the next steps.
+
+---
+
+```bash
+git clone git@github.com:gem-dpg-pfa/MuonDPGNTuples.git MuDPGAnalysis/MuonDPGNtuples
 ```
 
 ### Compile
 ```
 scram b -j 5
 ```
-## How to run the Ntuplzier
+## How to run the Ntuplizer
 ### Run the NTuplizer interactively
 - MC and MWGR Data use different **globalTag** and **CMSSW Release**. Edit config file accordingly!
 ```
