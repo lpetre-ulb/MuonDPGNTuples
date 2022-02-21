@@ -84,6 +84,18 @@ MuNtupleBaseFiller(config, tree, label), m_nullVecF()
   edm::InputTag & gemRecHitTag = m_config->m_inputTags["gemRecHitTag"];
   if (gemRecHitTag.label() != "none") m_gemRecHitToken = collector.consumes<GEMRecHitCollection>(gemRecHitTag);
   
+  edm::ParameterSet pset;
+  pset.addParameter<bool>("doCollisions", true);  
+  pset.addParameter<double>("chi2Norm_2D_", 35);
+  pset.addParameter<double>("chi2_str", 50.0);
+  pset.addParameter<double>("chi2Max", 100.0);
+  pset.addParameter<double>("dPhiIntMax", 0.005);
+  pset.addParameter<double>("dPhiMax", 0.006);
+  pset.addParameter<double>("wideSeg", 3.0);
+  pset.addParameter<int32_t>("minLayersApart", 1);
+  pset.addParameter<double>("dRIntMax", 2.0);
+  pset.addParameter<double>("dRMax", 1.5);
+  cscSegAlgo = new CSCSegAlgoRU(pset);
 }
 
 MuNtupleGEMMuonFiller::~MuNtupleGEMMuonFiller() 
@@ -413,6 +425,7 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
         //const reco::Track* track = muon.globalTrack().get();   //GLB muon
         const reco::Track* track = muon.outerTrack().get();   //STA muon
         const CSCSegment *ME11_segment;
+        std::vector<CSCSegment> cscSegments;
         
         if (track == nullptr) {
           std::cout << "failed to get muon track" << std::endl;
@@ -454,41 +467,56 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
         //auto recHitMuEnd = trackRef->recHitsEnd();       //GLB muon
         
         const reco::HitPattern& htp = transient_track.hitPattern();
+        std::vector<const CSCRecHit2D*> hitContainer;
         //Loop over recHits
-        for(; recHitMu != recHitMuEnd; ++recHitMu)
-        {
+        for(; recHitMu != recHitMuEnd; ++recHitMu) {
           DetId detId = (*recHitMu)->geographicalId();
           if(detId.det() == DetId::Muon && detId.subdetId() == MuonSubdetId::GEM)
             std::cout<<"GEM found in STA track"<<std::endl;
-          if(detId.det() == DetId::Muon && detId.subdetId() == MuonSubdetId::CSC)
-          {
+          if(detId.det() == DetId::Muon && detId.subdetId() == MuonSubdetId::CSC) {
             isCSC = true;
             const CSCDetId csc_id{detId};
             // ME11 chambers are composed by 2 subchambers: ME11a, ME11b. In CMSSW they are referred as Stat. 1 Ring 1, Stat. 1 Ring. 4 respectively
-            if(csc_id.station() == 1 && ((csc_id.ring() == 1) || (csc_id.ring() == 4)) )
-            { 
+            if(csc_id.station() == 1 && ((csc_id.ring() == 1) || (csc_id.ring() == 4)) ) { 
               isME11 = true;
               //extracting ME11 segment
-              RecSegment* Rec_segment = (RecSegment*)*recHitMu;
-              ME11_segment = (CSCSegment*)*recHitMu;
-              std::cout<<" extracted ME11 segment ignored "<<Rec_segment<<std::endl;
+              // RecSegment* Rec_segment = (RecSegment*)*recHitMu;
+              // ME11_segment = (CSCSegment*)*recHitMu;
+              // std::cout<<" extracted ME11 segment ignored "<<Rec_segment<<std::endl;
+              hitContainer.push_back((CSCRecHit2D*) *recHitMu);
             }
           }
         } //END Loop over recHits to find if is ME11
-        //Alternative way to take ME11 segment
-        auto matches = muon.matches();
-        for (auto MCM : matches){
-          if(MCM.detector() != 2) continue;
-          for(auto MSM : MCM.segmentMatches){
-            auto cscSegRef = MSM.cscSegmentRef;
-            auto cscDetID = cscSegRef->cscDetId();
-            if(cscDetID.station() == 1 and (cscDetID.ring() == 1 or cscDetID.ring() == 4)){
-              //isME11 = true;
-              //ME11_segment = cscSegRef.get();
-              std::cout<<" ME11 segment here too "<<ME11_segment<<std::endl;
-            }
+
+        // std::vector<CSCSegment> buildSegments(const CSCChamber* aChamber, const ChamberHitContainer& rechits) const;
+        if (hitContainer.size() > 0) {
+          const CSCChamber* chamber = csc->chamber(hitContainer[0]->cscDetId());
+          // std::cout << "Found " << hitContainer.size() << " hits. From Chamber " << chamber << std::endl;//" " << hitContainer[0]->cscDetId().region() << hitContainer[0]->cscDetId().station() << std::endl;
+          cscSegments = cscSegAlgo->buildSegments(chamber, hitContainer);
+          // std::cout << " Made " << cscSegments.size() << " segments from our chamber."<<std::endl;
+          if (cscSegments.size()>0){
+            // std::cout << " seg0 has " << cscSegments[0].nRecHits() << " rechits."<<std::endl;
+            // std::cout << " seg0 has proj. mat " << cscSegments[0].projectionMatrix()  << std::endl;
+            // std::cout << " seg0 has loc. pos. err.: " << cscSegments[0].localPositionError() << std::endl;
+            // std::cout << " seg0 has par. err.: " << cscSegments[0].parametersError() << std::endl;
+            ME11_segment = &cscSegments[0];
           }
         }
+
+        // Alternative way to take ME11 segment
+        // auto matches = muon.matches();
+        // for (auto MCM : matches){
+        //   if(MCM.detector() != 2) continue;
+        //   for(auto MSM : MCM.segmentMatches){
+        //     auto cscSegRef = MSM.cscSegmentRef;
+        //     auto cscDetID = cscSegRef->cscDetId();
+        //     if(cscDetID.station() == 1 and (cscDetID.ring() == 1 or cscDetID.ring() == 4)){
+        //       //isME11 = true;
+        //       //ME11_segment = cscSegRef.get();
+        //       std::cout<<" ME11 segment here too "<<ME11_segment<<std::endl;
+        //     }
+        //   }
+        // }
         m_isME11.push_back(isME11);
         //BEGIN propagation code (STA TRACK)
         //if at least one CSC hit is found, perform propagation 
@@ -683,8 +711,10 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
           //END propagation code (STA TRACK)
           //
           //BEGIN propagation code (CSC Segment)
-          if(isME11){ 
-            std::cout << "IT IS ME11!" << std::endl;
+          if (isME11 && cscSegments.size()>0) { 
+            // std::cout << "IT IS ME11!" << std::endl;
+            // std::cout << " ME11 segment has loc. pos. err.: " << ME11_segment->localPositionError() << std::endl;
+            // std::cout << " ME11 segment has par. err.: " << ME11_segment->parametersError() << std::endl;
             DetId segDetId = ME11_segment->geographicalId();
             const GeomDet* segDet = tracking_geometry->idToDet(segDetId);
   
@@ -696,14 +726,14 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
             LocalTrajectoryParameters param(ME11_segment->localPosition(), momentum_at_surface, muon.charge());
             AlgebraicSymMatrix mat(5,0);
 
-            std::cout << "ABOUT TO PRINT STUFF!" << std::endl;
-            std::cout << "ME11 SEGMENT: " << ME11_segment << std::endl;
-            std::cout << "PROJECTION MATRIX: " << ME11_segment->projectionMatrix() << std::endl;
-            //std::cout << "LOCAL POSITION ERROR: " << ME11_segment->localPositionError() << std::endl;
-            std::cout << "ERRORS: " << ME11_segment->parametersError() << std::endl;
-            std::cout << "DONE PRINTING ERRORS." << std::endl;
+            // std::cout << "ABOUT TO PRINT STUFF!" << std::endl;
+            // std::cout << "ME11 SEGMENT: " << ME11_segment << std::endl;
+            // std::cout << "PROJECTION MATRIX: " << ME11_segment->projectionMatrix() << std::endl;
+            // std::cout << "LOCAL POSITION ERROR: " << ME11_segment->localPositionError() << std::endl;
+            // std::cout << "ERRORS: " << ME11_segment->parametersError() << std::endl;
+            // std::cout << "DONE PRINTING ERRORS." << std::endl;
             mat = ME11_segment->parametersError().similarityT( ME11_segment->projectionMatrix() );
-            std::cout << "PRINTING MATRIX " << mat << std::endl;
+            //std::cout << "PRINTING MATRIX " << mat << std::endl;
             LocalTrajectoryError error(asSMatrix<5>(mat));
       
             for (const GEMRegion* gem_region : gem->regions())
