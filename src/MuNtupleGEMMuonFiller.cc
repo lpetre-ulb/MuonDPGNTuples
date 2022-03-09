@@ -142,6 +142,12 @@ void MuNtupleGEMMuonFiller::initialize()
   m_tree->Branch((m_label + "_propagated_chamber").c_str(), &m_propagated_chamber);
   m_tree->Branch((m_label + "_propagated_etaP").c_str(), &m_propagated_etaP);
 
+
+  m_tree->Branch((m_label + "_propagatedSeg_region").c_str(), &m_propagatedSeg_region);
+  m_tree->Branch((m_label + "_propagatedSeg_layer").c_str(), &m_propagatedSeg_layer);
+  m_tree->Branch((m_label + "_propagatedSeg_chamber").c_str(), &m_propagatedSeg_chamber);
+  m_tree->Branch((m_label + "_propagatedSeg_etaP").c_str(), &m_propagatedSeg_etaP);
+
   m_tree->Branch((m_label + "_propagated_pt").c_str(), &m_propagated_pt);
   m_tree->Branch((m_label + "_propagated_phi").c_str(), &m_propagated_phi);
   m_tree->Branch((m_label + "_propagated_eta").c_str(), &m_propagated_eta);
@@ -256,6 +262,11 @@ void MuNtupleGEMMuonFiller::clear()
   m_propagated_chamber.clear();
   m_propagated_etaP.clear();
   m_propagated_isME11.clear();
+
+  m_propagatedSeg_region.clear();
+  m_propagatedSeg_layer.clear();
+  m_propagatedSeg_chamber.clear();
+  m_propagatedSeg_etaP.clear();
   
   m_propagated_pt.clear();
   m_propagated_phi.clear();
@@ -772,7 +783,7 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
                       if (eta_partition->surface().bounds().inside(local_point_2d_seg)) 
                       {
                           
-                          const GEMDetId&& gem_id = eta_partition->id();
+                          const GEMDetId&& gem_Segid = eta_partition->id();
                           
                           //// PROPAGATED HIT ERROR EVALUATION
                           // X,Y FROM QC8 Code
@@ -815,6 +826,11 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
                           m_propagatedSegLoc_dirZ.push_back(dest_state_seg.localDirection().z());
                           m_propagatedSegLoc_errX.push_back(dest_local_err.xx());
                           m_propagatedSegLoc_errY.push_back(dest_local_err.yy());
+
+                          m_propagatedSeg_region.push_back(gem_Segid.region());
+                          m_propagatedSeg_layer.push_back(gem_Segid.layer());
+                          m_propagatedSeg_chamber.push_back(gem_Segid.chamber());
+                          m_propagatedSeg_etaP.push_back(gem_Segid.roll());
                       }
                     }//Loop over Eta Partition
                   }//Loop over chambers

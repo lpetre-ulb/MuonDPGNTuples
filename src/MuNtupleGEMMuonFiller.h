@@ -103,6 +103,11 @@ class MuNtupleGEMMuonFiller : public MuNtupleBaseFiller
   std::vector<int> m_propagated_chamber;
   std::vector<int> m_propagated_etaP;
 
+  std::vector<int> m_propagatedSeg_region;
+  std::vector<int> m_propagatedSeg_layer;
+  std::vector<int> m_propagatedSeg_chamber;
+  std::vector<int> m_propagatedSeg_etaP;
+
   std::vector<float> m_propagated_pt;
   std::vector<float> m_propagated_phi;
   std::vector<float> m_propagated_eta;
