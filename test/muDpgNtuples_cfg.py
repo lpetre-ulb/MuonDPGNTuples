@@ -10,15 +10,8 @@ import sys
 options = VarParsing.VarParsing()
 
 options.register('globalTag',
-                 #'112X_mcRun3_2021_realistic_v10',
-                 #'113X_dataRun3_Express_v4', #CUZET EXPRESS
-                 #'113X_dataRun3_Prompt_v3',  # CRUZET PROMPTRECO
-                 #'113X_dataRun3_Express_v2', #MWGR4
-                 #'112X_mcRun3_2021cosmics_realistic_deco_v13',#MC_Cosmics
-                 #'120X_dataRun3_Express_v2',  # CRAFT EXPRESS
-                 '120X_dataRun3_Prompt_v2',   # CRAFT PROMPTRECO
-                 #'120X_dataRun3_HLT_v3',       # CRAFT HLT
-                 #'112X_dataRun3_Prompt_v2',
+                 '122X_dataRun3_Express_v3',   # CRUZET 22 Express
+                 #'122X_dataRun3_Prompt_v3', # CRUZET 22 Prompt
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.string,
                  "Global Tag")
@@ -31,7 +24,7 @@ options.register('nEvents',
                  "Maximum number of processed events")
 
 options.register('isMC',
-                 True, #default value
+                 False, #default value
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.bool,
                  "Maximum number of processed events")
@@ -39,7 +32,7 @@ options.register('isMC',
 options.register('inputFolder',
                  #'/eos/cms/store/express/Commissioning2021/ExpressCosmics/FEVT/Express-v1/000/344/068/00000/',
                  #"/eos/cms/store/express/Commissioning2021/ExpressCosmics/FEVT/Express-v1/000/346/104/00000/",
-                 "/eos/cms/store/express/Commissioning2021/ExpressCosmics/FEVT/Express-v1/000/347/272/00000/",
+                 "/eos/cms/store/express/Commissioning2022/ExpressCosmics/FEVT/Express-v1/000/347/874/00000/",
                  #'/lustre/cms/store/user/gmilella/MCCosmics_0T_10M/CRAB3_MC_Cosmics_RECOCOSMICS_0T_10M/210309_112327/0000',
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.string,
@@ -80,8 +73,7 @@ process.source = cms.Source("PoolSource",
 if "eos/cms" in options.inputFolder:
     #files = subprocess.check_output(['xrdfs', 'root://eoscms.cern.ch/', 'ls', options.inputFolder]) ## Did work with CMSSW 11XX, not anymore w CMSSW 12
     files = os.listdir(options.inputFolder)
-    process.source.fileNames = ["root://eoscms.cern.ch//" + options.inputFolder + f for f in files]
-    print (process.source.fileNames)
+    process.source.fileNames = ["file:"+options.inputFolder + f for f in files]
 
 elif "/xrd/" in options.inputFolder:
     files = subprocess.check_output(['xrdfs', 'root://cms-xrdr.sdfarm.kr/', 'ls', options.inputFolder])

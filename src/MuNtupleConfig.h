@@ -63,7 +63,7 @@ class MuNtupleConfig
   std::map<std::string, edm::InputTag> m_inputTags;
 
   /// The class to handle DT trigger time pedestals
-  std::map<PhaseTag, std::unique_ptr<DTTTrigBaseSync>> m_dtSyncs;
+  /* std::map<PhaseTag, std::unique_ptr<DTTTrigBaseSync>> m_dtSyncs; */
 
   /// Handle to the tracking geometry
   edm::ESHandle<GlobalTrackingGeometry> m_trackingGeometry;

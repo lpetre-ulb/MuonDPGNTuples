@@ -38,9 +38,8 @@ the current commit, provided with these options, will analyze:
 Change the settings above based on your intended use
 ### Run the NTuplizer with CRAB
 - You have to authenticate yourself by mean of the grid certificate ( check the  [Twiki](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookStartingGrid#Using_your_grid_certificate) )
-- Edit the file `./CRAB_SUB/crabConfig.py`  specifying the Job input paramters (i.e. nEvents, isMC), the input dataset, where to store the output files 
-- Execute `crab submit -c  ./CRAB_SUB/crabConfig.py`
-
+- Source `/cvmfs/cms.cern.ch/common/crab-setup.sh`
+- Execute `python3  ./CRAB_SUB/crabConfig.py ` (specifying input paraemters)
 - Enjoy the rest of the day
 
 
