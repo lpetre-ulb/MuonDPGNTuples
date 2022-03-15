@@ -8,7 +8,7 @@ from argparse import RawTextHelpFormatter
 
 parser = argparse.ArgumentParser(
         description='''Scripts that: \n\t-Submit jobs for making GEMCommonNtuples''',
-        epilog="""Typical exectuion\n\t crab submit -c  P5Data_crabConfig.py  --RunList 348773 --Dataset Express""",
+        epilog="""Typical exectuion\n\t python3  P5Data_crabConfig.py  --RunList 348773 --Dataset Express""",
         formatter_class=RawTextHelpFormatter
 )
 parser.add_argument('--RunList','-rl', type=int,help="run(s) to be ntuplized, space separated",required=True,nargs='*')
@@ -57,6 +57,7 @@ run_list = args.RunList
 print("Submitting runs= ",run_list)
 print("Dataset = " ,inputDataset)
 print("GlobalTag = ",globalTag)
+print()
 
 
 for run_number in run_list:
