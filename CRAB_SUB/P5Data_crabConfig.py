@@ -37,8 +37,8 @@ config.JobType.pyCfgParams = ['isMC=False','nEvents=-1','globalTag='+str(globalT
 
 config.section_("Data")
 config.Data.inputDBS = 'global'
-config.Data.splitting = 'Automatic'
-config.Data.unitsPerJob = 180
+config.Data.splitting = 'FileBased'
+config.Data.unitsPerJob = 20
 config.Data.publication = False
 config.Data.outLFNDirBase = '/store/group/dpg_gem/comm_gem/P5_Commissioning/2022/GEMCommonNtuples'
 #config.Data.outLFNDirBase = '/store/user/fivone/GEMMuonNtuplizerZmumu'
