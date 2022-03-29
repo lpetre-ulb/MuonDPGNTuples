@@ -30,10 +30,7 @@ options.register('isMC',
                  "Maximum number of processed events")
 
 options.register('inputFolder',
-                 #'/eos/cms/store/express/Commissioning2021/ExpressCosmics/FEVT/Express-v1/000/344/068/00000/',
-                 #"/eos/cms/store/express/Commissioning2021/ExpressCosmics/FEVT/Express-v1/000/346/104/00000/",
                  "/eos/cms/store/express/Commissioning2022/ExpressCosmics/FEVT/Express-v1/000/347/874/00000/",
-                 #'/lustre/cms/store/user/gmilella/MCCosmics_0T_10M/CRAB3_MC_Cosmics_RECOCOSMICS_0T_10M/210309_112327/0000',
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.string,
                  "EOS folder with input files")
@@ -93,8 +90,6 @@ process.TFileService = cms.Service('TFileService',
     )
 
 process.load('Configuration/StandardSequences/GeometryRecoDB_cff')
-#process.load("Configuration.StandardSequences.MagneticField_0T_cff")
-#process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
 
 process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
@@ -105,8 +100,7 @@ process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOp
 process.load('Configuration.StandardSequences.RawToDigi_Data_cff')
 process.load('MuDPGAnalysis.MuonDPGNtuples.muNtupleProducer_cfi')
 
-process.p = cms.Path(#process.muonDTDigis + 
-                      process.muNtupleProducer)
+process.p = cms.Path(process.muNtupleProducer)
 
 process.muNtupleProducer.isMC = cms.bool(options.isMC)
 

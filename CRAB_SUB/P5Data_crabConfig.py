@@ -5,6 +5,11 @@ from WMCore.Configuration import Configuration
 from CRABAPI.RawCommand import crabCommand
 import argparse
 from argparse import RawTextHelpFormatter
+from pathlib import Path
+baseDirectory = Path(__file__).parents[1]
+baseDirectory = os.path.abspath(baseDirectory)
+print (baseDirectory)
+
 
 parser = argparse.ArgumentParser(
         description='''Scripts that: \n\t-Submit jobs for making GEMCommonNtuples''',
@@ -25,13 +30,13 @@ elif args.Dataset == 'Prompt':
 config = Configuration()
 
 config.section_("General")
-config.General.workArea = "/afs/cern.ch/user/f/fivone/Documents/NTuplizer/CRUZET/CMSSW_12_2_1/src/MuDPGAnalysis/"
+config.General.workArea = "{}/CRAB_SUB/".format(baseDirectory)
 config.General.transferOutputs = True
 config.General.transferLogs = True
 
 config.section_("JobType")
 config.JobType.pluginName = 'Analysis'
-config.JobType.psetName = '/afs/cern.ch/user/f/fivone/Documents/NTuplizer/CRUZET/CMSSW_12_2_1/src/MuDPGAnalysis/MuonDPGNtuples/test/muDpgNtuples_cfg.py'
+config.JobType.psetName = "{}/test/muDpgNtuples_cfg.py".format(baseDirectory)
 config.JobType.allowUndistributedCMSSW = True
 config.JobType.pyCfgParams = ['isMC=False','nEvents=-1','globalTag='+str(globalTag)]
 
@@ -41,15 +46,11 @@ config.Data.splitting = 'FileBased'
 config.Data.unitsPerJob = 20
 config.Data.publication = False
 config.Data.outLFNDirBase = '/store/group/dpg_gem/comm_gem/P5_Commissioning/2022/GEMCommonNtuples'
-#config.Data.outLFNDirBase = '/store/user/fivone/GEMMuonNtuplizerZmumu'
 config.Data.allowNonValidInputDataset = True
 
 config.section_("Site")
 config.Site.storageSite = 'T2_CH_CERN'
-#config.Site.storageSite = 'T2_DE_RWTH'
 
-#config.section_("User")
-#config.User.voGroup = 'dcms'
 
 run_list = args.RunList
 
