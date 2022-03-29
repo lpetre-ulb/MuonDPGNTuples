@@ -24,7 +24,11 @@ scram b -j 5
 ## How to run the Ntuplzier with CRAB
 - You have to authenticate yourself by mean of the grid certificate ( check the  [Twiki](https://twiki.cern.ch/twiki/bin/view/CMSPublic/WorkBookStartingGrid#Using_your_grid_certificate) )
 - Source `/cvmfs/cms.cern.ch/common/crab-setup.sh`
-- Execute `python3  ./CRAB_SUB/crabConfig.py --RunList <space spearated list of run to ntuplize> --Dataset <Express or Prompt>`
-- Monitor the status of your job
+- Execute `python3  ./CRAB_SUB/crabConfig.py --RunList <space spearated list of runs to ntuplize> --Dataset <Express or Prompt>` (express data available as soon as the run ends, prompt data available within 48h from the end of the run)
+- Monitor the status of your jobs
+
+## Possible issues
+- crab jobs fail because some of the data are not completely transferred.
+In these cases it is worth waiting ~24h and try again. If the jobs keep failing email the computing Computing Tools team
 
 
