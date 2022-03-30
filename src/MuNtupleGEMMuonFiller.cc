@@ -454,7 +454,7 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
                           if (is_incoming xor is_opposite_region) continue;
                           
                           for (const GEMStation* station : gem_region->stations())
-                              {
+                              {if (station->station()!=1) continue; // Skipping GE21 station
                                   for (const GEMSuperChamber* super_chamber : station->superChambers())
                                       {
                                           for (const GEMChamber* chamber : super_chamber->chambers())
