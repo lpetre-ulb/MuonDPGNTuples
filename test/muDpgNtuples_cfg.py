@@ -10,7 +10,7 @@ import sys
 options = VarParsing.VarParsing()
 
 options.register('globalTag',
-                 '122X_dataRun3_Express_v3',   # CRUZET 22 Express
+                 '122X_dataRun3_Express_v5',   # CRUZET 22 Express
                  #'122X_dataRun3_Prompt_v3', # CRUZET 22 Prompt
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.string,
