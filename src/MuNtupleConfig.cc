@@ -29,7 +29,12 @@
 MuNtupleConfig::MuNtupleConfig(const edm::ParameterSet & config,
 			       edm::ConsumesCollector && collector) 
 { 
-  
+  m_trackingGeomToken = collector.esConsumes<>();
+  m_ttbToken = collector.esConsumes<>(edm::ESInputTag("", "TransientTrackBuilder"));
+
+  m_gemGeomToken = collector.esConsumes<edm::Transition::BeginRun>();
+  m_cscGeomToken = collector.esConsumes<edm::Transition::BeginRun>();
+
   edm::InputTag none = edm::InputTag("none");
   
   m_inputTags["ph1DtDigiTag"] = config.getUntrackedParameter<edm::InputTag>("ph1DtDigiTag", none);
@@ -73,6 +78,8 @@ MuNtupleConfig::MuNtupleConfig(const edm::ParameterSet & config,
 void MuNtupleConfig::getES(const edm::EventSetup & environment) 
 {
   m_muonSP->update(environment);
+  m_trackingGeometry = environment.getHandle(m_trackingGeomToken);
+  m_transientTrackBuilder = environment.getHandle(m_ttbToken);
 }
 
 void MuNtupleConfig::getES(const edm::Run &run, const edm::EventSetup & environment) 
@@ -84,12 +91,9 @@ void MuNtupleConfig::getES(const edm::Run &run, const edm::EventSetup & environm
   // if (m_inputTags["ph2DtSegmentTag"].label() != "none")
   //   m_dtSyncs[PhaseTag::PH2]->setES(environment);
 
-  environment.get<MuonGeometryRecord>().get(m_dtGeometry);
-  environment.get<MuonGeometryRecord>().get(m_gemGeometry);
-  environment.get<MuonGeometryRecord>().get(m_cscGeometry);
+  m_cscGeometry = environment.getHandle(m_cscGeomToken);
+  m_gemGeometry = environment.getHandle(m_gemGeomToken);
 
-  environment.get<GlobalTrackingGeometryRecord>().get(m_trackingGeometry);
-  environment.get<TransientTrackRecord>().get("TransientTrackBuilder", m_transientTrackBuilder);
   
 
 }

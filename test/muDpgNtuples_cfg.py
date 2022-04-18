@@ -10,8 +10,7 @@ import sys
 options = VarParsing.VarParsing()
 
 options.register('globalTag',
-                 '122X_dataRun3_Express_v5',   # CRUZET 22 Express
-                 #'122X_dataRun3_Prompt_v3', # CRUZET 22 Prompt
+                 '123X_dataRun3_Express_v5',   # CRUZET 22 Express
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.string,
                  "Global Tag")
@@ -30,7 +29,7 @@ options.register('isMC',
                  "Maximum number of processed events")
 
 options.register('inputFolder',
-                 "/eos/cms/store/express/Commissioning2022/ExpressCosmics/FEVT/Express-v1/000/347/874/00000/",
+                 "/eos/cms/store/express/Commissioning2022/ExpressCosmics/FEVT/Express-v1/000/350/424/00000/",
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.string,
                  "EOS folder with input files")

@@ -19,7 +19,7 @@
 
 #include "CalibMuon/DTDigiSync/interface/DTTTrigBaseSync.h"
 #include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h"
-#include "Geometry/DTGeometry/interface/DTGeometry.h"
+//#include "Geometry/DTGeometry/interface/DTGeometry.h"
 #include "Geometry/GEMGeometry/interface/GEMGeometry.h"
 #include "Geometry/CSCGeometry/interface/CSCGeometry.h"
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
@@ -66,19 +66,27 @@ class MuNtupleConfig
   /* std::map<PhaseTag, std::unique_ptr<DTTTrigBaseSync>> m_dtSyncs; */
 
   /// Handle to the tracking geometry
+  edm::ESGetToken<GlobalTrackingGeometry, GlobalTrackingGeometryRecord> m_trackingGeomToken;
   edm::ESHandle<GlobalTrackingGeometry> m_trackingGeometry;
 
   /// Handle to the DT geometry
-  edm::ESHandle<DTGeometry> m_dtGeometry;
+  //edm::ESHandle<DTGeometry> m_dtGeometry;
 
   /// Handle to the GEM geometry
   edm::ESHandle<GEMGeometry> m_gemGeometry;
+  /// Token to the GEM geometry
+  edm::ESGetToken<GEMGeometry, MuonGeometryRecord> m_gemGeomToken;
+
 
   /// Handle to the CSC geometry
   edm::ESHandle<CSCGeometry> m_cscGeometry;
+  /// Token to the CSC geometry
+  edm::ESGetToken<CSCGeometry, MuonGeometryRecord> m_cscGeomToken;
 
   /// Handle to the Transient Track Builder
+  edm::ESGetToken<TransientTrackBuilder, TransientTrackRecord> m_ttbToken;
   edm::ESHandle<TransientTrackBuilder> m_transientTrackBuilder;
+
 
   //MuonServiceProxy *muon_service;
   std::unique_ptr<MuonServiceProxy> m_muonSP;
