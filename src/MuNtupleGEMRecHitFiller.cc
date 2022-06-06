@@ -99,11 +99,15 @@ void MuNtupleGEMRecHitFiller::fill(const edm::Event & ev)
 	for (auto rechit = rechit_collection->begin(); rechit != rechit_collection->end(); rechit++)
 	  {
 	    GEMDetId gem_id{rechit->gemId()};
-	    	    	    
+
 	    int roll = gem_id.roll();
 	    int region = gem_id.region();
 	    int chamber = gem_id.chamber();
 	    int layer = gem_id.layer();
+	    int station = gem_id.station();
+
+            //GE21 DEMO 
+            if(station!=2) continue;
 
 	    m_rechit_etaPartition.push_back(roll);
 	    m_rechit_region.push_back(region);
@@ -135,6 +139,7 @@ void MuNtupleGEMRecHitFiller::fill(const edm::Event & ev)
 	    m_rechit_firstClusterStrip.push_back(firstClusterStrip);
 
 	    m_nRecHits++;
+
 	  }
 	//std::cout << " # rechits: " << m_nRecHits << std::endl;
 

@@ -46,6 +46,7 @@ MuNtupleProducer::MuNtupleProducer( const edm::ParameterSet & config )
   usesResource("TFileService");
   edm::Service<TFileService> fileService;
   bool isMC = static_cast<bool>(config.getParameter<bool>("isMC"));
+  
   m_tree = std::shared_ptr<TTree>(fileService->make<TTree>("MuDPGTree","Mu DPG Tree"));
   
   

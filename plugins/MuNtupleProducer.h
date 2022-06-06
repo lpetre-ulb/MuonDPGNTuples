@@ -43,7 +43,7 @@ class MuNtupleProducer : public edm::one::EDAnalyzer<edm::one::SharedResources,e
   virtual void endJob() override;
   
  private:
-  
+ 
   /// Pointer to the TTree
   std::shared_ptr<TTree> m_tree;
 

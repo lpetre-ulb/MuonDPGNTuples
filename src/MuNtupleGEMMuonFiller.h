@@ -80,6 +80,7 @@ class MuNtupleGEMMuonFiller : public MuNtupleBaseFiller
   std::vector<bool>  m_isGEM;
   std::vector<bool>  m_isCSC;
   std::vector<bool> m_isME11;
+  std::vector<bool> m_isME21;
 
   std::vector<bool> m_propagated_isME11;
   std::vector<bool> m_propagated_isGEM;

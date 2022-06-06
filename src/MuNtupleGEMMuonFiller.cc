@@ -88,6 +88,7 @@ void MuNtupleGEMMuonFiller::initialize()
   m_tree->Branch((m_label + "_isGEM").c_str(), &m_isGEM);
   m_tree->Branch((m_label + "_isCSC").c_str(), &m_isCSC);
   m_tree->Branch((m_label + "_isME11").c_str(), &m_isME11);
+  m_tree->Branch((m_label + "_isME21").c_str(), &m_isME21);
   
   m_tree->Branch((m_label + "_isLoose").c_str(), &m_isLoose);
   m_tree->Branch((m_label + "_isMedium").c_str(), &m_isMedium);
@@ -178,6 +179,7 @@ void MuNtupleGEMMuonFiller::clear()
   m_isGEM.clear();
   m_isCSC.clear();
   m_isME11.clear();
+  m_isME21.clear();
 
   m_propagated_TrackNormChi2.clear();
 
@@ -254,6 +256,8 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
 
   clear();
 
+  bool doGE21 = true; //flag to be put in configuration
+
   auto muons = conditionalGet<reco::MuonCollection>(ev, m_muToken, "MuonCollection");
   auto gem_segments = conditionalGet<GEMSegmentCollection>(ev,m_gemSegmentToken, "GEMSegmentCollection");
   auto csc_segments = conditionalGet<CSCSegmentCollection>(ev,m_cscSegmentToken, "CSCSegmentCollection" );
@@ -261,6 +265,7 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
 
   bool isCSC = false;
   bool isME11 = false;
+  bool isME21 = false;
   
   edm::Handle<GEMRecHitCollection> rechit_collection;
   ev.getByToken(m_gemRecHitToken, rechit_collection);
@@ -330,6 +335,7 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
       
       isCSC = false;
       isME11 = false;
+      isME21 = false;
 
 	  
 	  if(!muon.outerTrack().isNull())   //STA muon
@@ -398,12 +404,18 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
                               {
                                   isME11 = true;
                               }
+                          // ME21 chambers
+                          if(csc_id.station() == 2 && (csc_id.ring() == 1))
+                              {
+                                  isME21 = true;
+                              }
                       }
               } //loop on recHits to find if is ME11
           
                             
 	      m_isCSC.push_back(isCSC);
 	      m_isME11.push_back(isME11);
+	      m_isME21.push_back(isME21);
 	      
           //if at least one CSC hit is found, perform propagation 
 	      if(isCSC)
@@ -452,9 +464,11 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
                       {
                           bool is_opposite_region = muon.eta() * gem_region->region() < 0;
                           if (is_incoming xor is_opposite_region) continue;
-                          
-                          for (const GEMStation* station : gem_region->stations())
-                              {if (station->station()!=1) continue; // Skipping GE21 station
+
+                          for (const GEMStation* station : gem_region->stations()){
+                              std::cout<<"station "<<station->station()<<std::endl; 
+                              if ( doGE21==false && station->station()!=1) continue; // Only GE11 station
+                              else if ( doGE21==true && station->station()!=2) continue; // Only GE21 station
                                   for (const GEMSuperChamber* super_chamber : station->superChambers())
                                       {
                                           for (const GEMChamber* chamber : super_chamber->chambers())

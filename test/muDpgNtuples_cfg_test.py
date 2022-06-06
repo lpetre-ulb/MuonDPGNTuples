@@ -10,7 +10,7 @@ import sys
 options = VarParsing.VarParsing()
 
 options.register('globalTag',
-                 '123X_dataRun3_Express_v6',   # CRUZET 22 Express
+                 '123X_dataRun3_Express_v5',   # CRUZET 22 Express
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.string,
                  "Global Tag")
@@ -26,7 +26,13 @@ options.register('isMC',
                  False, #default value
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.bool,
-                 "Maximum number of processed events")
+                 "isMC boolean")
+
+options.register('isGE21',
+                 True, #default value
+                 VarParsing.VarParsing.multiplicity.singleton,
+                 VarParsing.VarParsing.varType.bool,
+                 "isGE21 boolean")
 
 options.register('inputFolder',
                  '/eos/user/f/fsimone/GE21_demo_test/', #GE21 demo data here
@@ -67,9 +73,11 @@ process.source = cms.Source("PoolSource",
         secondaryFileNames = cms.untracked.vstring()
 )
 
+process.source.fileNames = ["file:///eos/user/f/fsimone/GE21_demo_test/step3_45.root"]
 
-process.source.fileNames = ["/eos/user/f/fsimone/GE21_demo_test/prova.root"]
-
+process.TFileService = cms.Service('TFileService',
+        fileName = cms.string(options.ntupleName)
+    )
 
 process.load('Configuration/StandardSequences/GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
@@ -85,5 +93,6 @@ process.load('MuDPGAnalysis.MuonDPGNtuples.muNtupleProducer_cfi')
 process.p = cms.Path(process.muNtupleProducer)
 
 process.muNtupleProducer.isMC = cms.bool(options.isMC)
+process.muNtupleProducer.isGE21 = cms.bool(options.isGE21)
 
 process.p = cms.Path(process.muNtupleProducer)
