@@ -17,15 +17,29 @@ parser = argparse.ArgumentParser(
         formatter_class=RawTextHelpFormatter
 )
 parser.add_argument('--RunList','-rl', type=int,help="run(s) to be ntuplized, space separated",required=True,nargs='*')
-parser.add_argument('--Dataset','-d',nargs='?',choices=['Express', 'Prompt'],help='Dataset to be used (check availability on DAS)',required=True)
+parser.add_argument('--Dataset','-d',nargs='?',choices=['Express', 'Prompt','ZeroBias','SingleMuon','MinimumBias'],help='Dataset to be used (check availability on DAS)',required=True)
 
 args = parser.parse_args()
 if args.Dataset == 'Express':
-    inputDataset = '/ExpressCosmics/Commissioning2022-Express-v1/FEVT'
-    globalTag = '122X_dataRun3_Express_v3'
+    inputDataset= '/ExpressPhysics/Run2022B-Express-v1/FEVT'
+    globalTag = ['123X_dataRun3_Express_v6']
+    unitsPerJob = 20
 elif args.Dataset == 'Prompt':
-    globalTag = '122X_dataRun3_Prompt_v3'
-    inputDataset = '/Cosmics/Commissioning2022-PromptReco-v1/AOD'
+    globalTag = '123X_dataRun3_Prompt_v8'
+    inputDataset = ['/Commissioning/Run2022A-PromptReco-v1/AOD']
+    unitsPerJob = 20
+elif args.Dataset == 'ZeroBias':
+    globalTag = '123X_dataRun3_Prompt_v8'
+    inputDataset = ['/ZeroBias'+str(i)+'/Run2022B-PromptReco-v1/AOD' for i in range(20)]
+    unitsPerJob = 1
+elif args.Dataset == 'SingleMuon':
+    globalTag = '123X_dataRun3_Prompt_v8'
+    inputDataset = ['/SingleMuon/Run2022A-PromptReco-v1/AOD']
+    unitsPerJob = 1
+elif args.Dataset == 'MinimumBias':
+    globalTag = '123X_dataRun3_Prompt_v8'
+    inputDataset = ['/MinimumBias'+str(i)+'/Run2022A-PromptReco-v1/AOD' for i in range(10)]
+    unitsPerJob = 1
 
 config = Configuration()
 
@@ -39,11 +53,12 @@ config.JobType.pluginName = 'Analysis'
 config.JobType.psetName = "{}/test/muDpgNtuples_cfg.py".format(baseDirectory)
 config.JobType.allowUndistributedCMSSW = True
 config.JobType.pyCfgParams = ['isMC=False','nEvents=-1','globalTag='+str(globalTag)]
+config.JobType.maxMemoryMB = 5000
 
 config.section_("Data")
 config.Data.inputDBS = 'global'
 config.Data.splitting = 'FileBased'
-config.Data.unitsPerJob = 20
+config.Data.unitsPerJob = unitsPerJob
 config.Data.publication = False
 config.Data.outLFNDirBase = '/store/group/dpg_gem/comm_gem/P5_Commissioning/2022/GEMCommonNtuples'
 config.Data.allowNonValidInputDataset = True
@@ -58,14 +73,16 @@ run_list = args.RunList
 print("Submitting runs= ",run_list)
 print("Dataset = " ,inputDataset)
 print("GlobalTag = ",globalTag)
-print()
+print(config)
 
 
 for run_number in run_list:
-    FolderName = str(run_number)+'_'+str(args.Dataset)
-    config.Data.inputDataset = inputDataset
-    config.Data.outputDatasetTag = FolderName
-    config.General.requestName = FolderName
-    config.Data.runRange = str(run_number)
-    crabCommand('submit', config = config)
+    for indataset in inputDataset:
+        outputName = str(run_number)+'_'+str(args.Dataset)
+        crab_folderName = str(run_number)+'_'+indataset.split("/")[1]
+        config.Data.inputDataset = indataset
+        config.Data.outputDatasetTag = outputName
+        config.General.requestName = crab_folderName
+        config.Data.runRange = str(run_number)
+        crabCommand('submit', config = config)
 sys.exit(0)
