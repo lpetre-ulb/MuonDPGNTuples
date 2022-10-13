@@ -77,16 +77,25 @@ void MuNtupleGEMVFATStatusFiller::fill(const edm::Event & ev)
           for (auto ohIt = OH_StatusCollection->begin(); ohIt != OH_StatusCollection->end(); ohIt++) \
               {
                   const GEMDetId& gem_id = (*ohIt).first;
-                  const GEMOHStatusCollection::Range& range = (*ohIt).second;
+                  const GEMOHStatusCollection::Range &range = (*ohIt).second;
 
+                  int region = gem_id.region();
+                  int station = gem_id.station();
+                  int chamber = gem_id.chamber();
+                  int layer = gem_id.layer();
+                  int etaPartition = gem_id.roll();
 
-                  const GEMEtaPartition* roll = gem->etaPartition(gem_id);
-                  const BoundPlane& surface = roll->surface();
+                  
 
-                  for (auto digi = range.first; digi != range.second; ++digi) {
+                  for (auto OHStatus = range.first; OHStatus != range.second; ++OHStatus) {
 
-                      m_digi_station.push_back(gem_id.station());
-                      m_digi_roll.push_back(gem_id.roll());
+                      const uint32_t missing = OHStatus->missingVFATs();
+                      std::cout<<"re: "<<region<<"\tch: "<<chamber<<"\tly: "<<layer<<"\tVFATMask: "<<std::endl;
+                  }
+                  // for (auto digi = range.first; digi != range.second; ++digi) {
+
+                  //     m_digi_station.push_back(gem_id.station());
+                  //     m_digi_roll.push_back(gem_id.roll());
                       // m_digi_strip.push_back(digi->strip());
                       // m_digi_bx.push_back(digi->bx());
 
@@ -102,12 +111,12 @@ void MuNtupleGEMVFATStatusFiller::fill(const edm::Event & ev)
                       // m_digi_g_y.push_back(global_pos.y());
                       // m_digi_g_z.push_back(global_pos.z());
 	    
-                      m_nDigis++;
+                      // m_nDigis++;
 	   
 
-	  }
+                  // }
 
-	}
+              }
       
       }    
   else{
