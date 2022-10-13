@@ -10,7 +10,7 @@ import sys
 options = VarParsing.VarParsing()
 
 options.register('globalTag',
-                 '123X_dataRun3_Prompt_v8',
+                 '124X_dataRun3_Prompt_v4',
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.string,
                  "Global Tag")
@@ -30,7 +30,8 @@ options.register('isMC',
 
 options.register('inputFolder',
                  #/eos/cms/store/
-                 "/eos/cms/store/express/Run2022D/ExpressPhysics/FEVT/Express-v2/000/357/899/00000/",
+                 #"/eos/cms/store/data/Run2022D/Muon/RAW-RECO/ZMu-PromptReco-v2/000/357/734/00000/",
+                 "/eos/cms/store/data/Run2022D/Muon/RAW/v1/000/357/542/00000/",
                  #"/eos/cms/store/group/dpg_gem/comm_gem/reRECO/SingleMuon/GEM-reRECO-GEM-only__Run2022B-ZMu-PromptReco-v1__RAW-RECO/220721_151149/0000/",
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.string,
@@ -68,6 +69,7 @@ process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(options.nEven
 #process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 
 process.GlobalTag.globaltag = cms.string(options.globalTag)
+process.GlobalTag = GlobalTag(process.GlobalTag, options.globalTag, '')
 
 process.source = cms.Source("PoolSource",
         fileNames = cms.untracked.vstring(),
@@ -77,7 +79,8 @@ process.source = cms.Source("PoolSource",
 if "eos/cms" in options.inputFolder:
     #files = subprocess.check_output(['xrdfs', 'root://eoscms.cern.ch/', 'ls', options.inputFolder]) ## Did work with CMSSW 11XX, not anymore w CMSSW 12
     files = os.listdir(options.inputFolder)
-    process.source.fileNames = ["file:"+options.inputFolder + f for f in files if "550adffc-be62-45de-9a97-f514d3e49886.root" in f]
+    #process.source.fileNames = ["file:"+options.inputFolder + f for f in files if "07a64f0e-25eb-40b6-b2a6-e8971a4e0ce8.root" in f]
+    process.source.fileNames = ["root://xrootd-cms.infn.it//store/data/Run2022D/Muon/RAW-RECO/ZMu-PromptReco-v2/000/357/734/00000/07a64f0e-25eb-40b6-b2a6-e8971a4e0ce8.root"]
 
 elif "/xrd/" in options.inputFolder:
     files = subprocess.check_output(['xrdfs', 'root://cms-xrdr.sdfarm.kr/', 'ls', options.inputFolder])
@@ -107,8 +110,11 @@ process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOp
 process.load('Configuration.StandardSequences.RawToDigi_Data_cff')
 process.load('MuDPGAnalysis.MuonDPGNtuples.muNtupleProducer_cfi')
 
-process.p = cms.Path(process.muNtupleProducer)
+
 
 process.muNtupleProducer.isMC = cms.bool(options.isMC)
 
-process.p = cms.Path(process.muNtupleProducer)
+process.p = cms.Path(
+    process.muonGEMDigis
+    + process.muNtupleProducer
+)
