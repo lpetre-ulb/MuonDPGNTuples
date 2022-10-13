@@ -40,7 +40,7 @@ elif args.Dataset == 'ZeroBias':
     fileSplitting = "FileBased"
 elif args.Dataset == 'ZMu':
     globalTag = '123X_dataRun3_Prompt_v8'
-    inputDataset = ['/Muon/Run2022D-ZMu-PromptReco-v2/RAW-RECO']
+    inputDataset = ['/Muon/Run2022E-ZMu-PromptReco-v1/RAW-RECO']
     unitsPerJob = 5
     fileSplitting = "FileBased"
 elif args.Dataset == 'MinimumBias':
@@ -89,7 +89,7 @@ print(config)
 for run_number in run_list:
     for indataset in inputDataset:
         ## Check dataset exsistance
-        das_query = ' dasgoclient -query="dataset run= "'+str(run_number)
+        das_query = ' dasgoclient -query="dataset run='+str(run_number)+'"'
         availble_datasets = subprocess.check_output(das_query,shell=True).decode("utf-8").split('\n')
         if indataset in availble_datasets:
             print(f"Dataset {indataset} exists for run {run_number}")
