@@ -1,3 +1,4 @@
+
 #include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMMuonFiller.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/LuminosityBlock.h"
@@ -88,12 +89,14 @@ void MuNtupleGEMMuonFiller::initialize()
   m_tree->Branch((m_label + "_isGEM").c_str(), &m_isGEM);
   m_tree->Branch((m_label + "_isCSC").c_str(), &m_isCSC);
   m_tree->Branch((m_label + "_isME11").c_str(), &m_isME11);
+  m_tree->Branch((m_label + "_isME21").c_str(), &m_isME21);
   
   m_tree->Branch((m_label + "_isLoose").c_str(), &m_isLoose);
   m_tree->Branch((m_label + "_isMedium").c_str(), &m_isMedium);
   m_tree->Branch((m_label + "_isTight").c_str(), &m_isTight);
 
   m_tree->Branch((m_label + "_propagated_isME11").c_str(), &m_propagated_isME11);
+  m_tree->Branch((m_label + "_propagated_isME21").c_str(), &m_propagated_isME21);
 
   m_tree->Branch((m_label + "_propagated_TrackNormChi2").c_str(), &m_propagated_TrackNormChi2);
 
@@ -107,6 +110,7 @@ void MuNtupleGEMMuonFiller::initialize()
   m_tree->Branch((m_label + "_isincoming").c_str(), &m_isincoming);
 
   m_tree->Branch((m_label + "_propagated_region").c_str(), &m_propagated_region);
+  m_tree->Branch((m_label + "_propagated_station").c_str(), &m_propagated_station);
   m_tree->Branch((m_label + "_propagated_layer").c_str(), &m_propagated_layer);
   m_tree->Branch((m_label + "_propagated_chamber").c_str(), &m_propagated_chamber);
   m_tree->Branch((m_label + "_propagated_etaP").c_str(), &m_propagated_etaP);
@@ -179,6 +183,7 @@ void MuNtupleGEMMuonFiller::clear()
   m_isGEM.clear();
   m_isCSC.clear();
   m_isME11.clear();
+  m_isME21.clear();
 
   m_propagated_TrackNormChi2.clear();
 
@@ -196,10 +201,12 @@ void MuNtupleGEMMuonFiller::clear()
   m_isincoming.clear();
 
   m_propagated_region.clear();
+  m_propagated_station.clear();
   m_propagated_layer.clear();
   m_propagated_chamber.clear();
   m_propagated_etaP.clear();
   m_propagated_isME11.clear();
+  m_propagated_isME21.clear();
   
   m_propagated_pt.clear();
   m_propagated_phi.clear();
@@ -263,6 +270,7 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
 
   bool isCSC = false;
   bool isME11 = false;
+  bool isME21 = false;
   
   edm::Handle<GEMRecHitCollection> rechit_collection;
   ev.getByToken(m_gemRecHitToken, rechit_collection);
@@ -329,6 +337,7 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
       
       isCSC = false;
       isME11 = false;
+      isME21 = false;
 
 	  //if(!muon.globalTrack().isNull())  //GLB muon
 	  //if(!muon.innerTrack().isNull() && muon.innerTrack().isAvailable())   //tracker muon	  
@@ -405,12 +414,18 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
                               {
                                   isME11 = true;
                               }
+                          if(csc_id.station() == 2 && csc_id.ring() == 1)
+                              {
+                                  isME21 = true;
+                              }
+
                       }
-              } //loop on recHits to find if is ME11
+              } //loop on recHits to find if muon has MEX1 hits
           
                             
 	      m_isCSC.push_back(isCSC);
 	      m_isME11.push_back(isME11);
+	      m_isME21.push_back(isME21);
 	      
           //if at least one CSC hit is found, perform propagation 
 	      if(isCSC)
@@ -461,7 +476,7 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
                           if (is_incoming xor is_opposite_region) continue;
                           
                           for (const GEMStation* station : gem_region->stations())
-                              {if (station->station()!=1) continue; // Skipping GE21 station
+                              {//if (station->station()!=1) continue; // Skipping GE21 station
                                   for (const GEMSuperChamber* super_chamber : station->superChambers())
                                       {
                                           for (const GEMChamber* chamber : super_chamber->chambers())
@@ -473,7 +488,6 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
                                                           // PROPAGATION ON ETAP SURFACE
                                                           // The Z of the dest_state is fixed one the boundplane. x,y are actually evaluated by the propagator at that Z
                                                           const auto& dest_state = propagator_any->propagate(start_state,bound_plane);
-
                                                           //END PROPAGATION ON ETAP SURFACE
 
                                                           // // PROPAGATION IN THE DRIFT GAP
@@ -529,8 +543,7 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
                                                                   const double dest_global_phi_err = std::sqrt(dest_global_err.phierr(dest_global_pos));
                                                                   
                                                                   m_propagated_isME11.push_back(isME11);
-
-
+                                                                  m_propagated_isME21.push_back(isME21);
 
                                                                   m_propagated_nME1hits.push_back(nME1_hits);
                                                                   m_propagated_nME2hits.push_back(nME2_hits);
@@ -581,6 +594,7 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
                                                                   m_propagatedGlb_phierr.push_back(dest_global_phi_err);
                                                                   
                                                                   m_propagated_region.push_back(gem_id.region());
+                                                                  m_propagated_station.push_back(gem_id.station());
                                                                   m_propagated_layer.push_back(gem_id.layer());
                                                                   m_propagated_chamber.push_back(gem_id.chamber());
                                                                   m_propagated_etaP.push_back(gem_id.roll());

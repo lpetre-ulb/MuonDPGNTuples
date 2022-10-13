@@ -80,8 +80,10 @@ class MuNtupleGEMMuonFiller : public MuNtupleBaseFiller
   std::vector<bool>  m_isGEM;
   std::vector<bool>  m_isCSC;
   std::vector<bool> m_isME11;
+  std::vector<bool> m_isME21;
 
   std::vector<bool> m_propagated_isME11;
+  std::vector<bool> m_propagated_isME21;
   std::vector<bool> m_propagated_isGEM;
 
   std::vector<bool>  m_isLoose;  // Loose muon ID
@@ -94,6 +96,7 @@ class MuNtupleGEMMuonFiller : public MuNtupleBaseFiller
   float m_path_length;
 
   std::vector<int> m_propagated_region;
+  std::vector<int> m_propagated_station;
   std::vector<int> m_propagated_layer;
   std::vector<int> m_propagated_chamber;
   std::vector<int> m_propagated_etaP;

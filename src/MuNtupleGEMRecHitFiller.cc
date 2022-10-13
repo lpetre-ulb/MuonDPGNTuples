@@ -30,6 +30,7 @@ void MuNtupleGEMRecHitFiller::initialize()
   m_tree->Branch((m_label + "_bx").c_str(), &m_rechit_bx);
 
   m_tree->Branch((m_label + "_region").c_str(), &m_rechit_region);
+  m_tree->Branch((m_label + "_station").c_str(), &m_rechit_station);
   m_tree->Branch((m_label + "_chamber").c_str(), &m_rechit_chamber);
   m_tree->Branch((m_label + "_layer").c_str(), &m_rechit_layer);
   m_tree->Branch((m_label + "_etaPartition").c_str(), &m_rechit_etaPartition);
@@ -61,6 +62,7 @@ void MuNtupleGEMRecHitFiller::clear()
   m_rechit_firstClusterStrip.clear();
 
   m_rechit_region.clear();
+  m_rechit_station.clear();
   m_rechit_chamber.clear();
   m_rechit_layer.clear();
   m_rechit_etaPartition.clear();
@@ -102,11 +104,13 @@ void MuNtupleGEMRecHitFiller::fill(const edm::Event & ev)
 	    	    	    
 	    int roll = gem_id.roll();
 	    int region = gem_id.region();
+	    int station = gem_id.station();
 	    int chamber = gem_id.chamber();
 	    int layer = gem_id.layer();
 
 	    m_rechit_etaPartition.push_back(roll);
 	    m_rechit_region.push_back(region);
+	    m_rechit_station.push_back(station);
 	    m_rechit_chamber.push_back(chamber);
 	    m_rechit_layer.push_back(layer);
 
