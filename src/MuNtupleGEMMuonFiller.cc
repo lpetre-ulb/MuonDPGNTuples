@@ -152,6 +152,7 @@ void MuNtupleGEMMuonFiller::initialize()
   m_tree->Branch((m_label + "_propagated_nME4hits").c_str(), &m_propagated_nME4hits);
 
 
+
   m_tree->Branch((m_label + "_propagated_Innermost_x").c_str(), &m_propagated_Innermost_x);
   m_tree->Branch((m_label + "_propagated_Innermost_y").c_str(), &m_propagated_Innermost_y);
   m_tree->Branch((m_label + "_propagated_Innermost_z").c_str(), &m_propagated_Innermost_z);
@@ -232,6 +233,7 @@ void MuNtupleGEMMuonFiller::clear()
   m_propagated_nME3hits.clear();
   m_propagated_nME4hits.clear();
 
+
   m_propagated_Innermost_x.clear();
   m_propagated_Innermost_y.clear();
   m_propagated_Innermost_z.clear();
@@ -264,17 +266,14 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
   
   edm::Handle<GEMRecHitCollection> rechit_collection;
   ev.getByToken(m_gemRecHitToken, rechit_collection);
-  if (not rechit_collection.isValid()) {
-    std::cout << "GEMRecHitCollection is invalid" << std::endl;
-    return;
-  }
+
  
   edm::ESHandle<Propagator>&& propagator_any = m_config->m_muonSP->propagator("SteppingHelixPropagatorAny");
   if (not propagator_any.isValid()) {
     std::cout<< "Any Propagator is invalid" << std::endl;
     return;
   }
-  
+
   edm::ESHandle<Propagator>&& propagator_along = m_config->m_muonSP->propagator("SteppingHelixPropagatorAlong");
   if (not propagator_along.isValid()) {
     std::cout<< "Along Propagator is invalid" << std::endl;
@@ -331,23 +330,26 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
       isCSC = false;
       isME11 = false;
 
-	  
+	  //if(!muon.globalTrack().isNull())  //GLB muon
+	  //if(!muon.innerTrack().isNull() && muon.innerTrack().isAvailable())   //tracker muon	  
 	  if(!muon.outerTrack().isNull())   //STA muon
-	  //if(!muon.globalTrack().isNull())   //GLB muon
+
 	    {
 	      
 
 	      //const reco::Track* track = muon.globalTrack().get();   //GLB muon
-	      const reco::Track* track = muon.outerTrack().get();   //STA muon
+          //const reco::Track* track = muon.innerTrack().get();    //tracker muon
+          const reco::Track* track = muon.outerTrack().get();    //STA muon
 	      
 	      if (track == nullptr) {
 		std::cout << "failed to get muon track" << std::endl;
                 continue;
               }
-              
-  
-	      const reco::TrackRef outerTrackRef = muon.outerTrack();   //STA muon
-	      //const reco::TrackRef trackRef = muon.globalTrack();     //GLB muon
+
+	      //const reco::TrackRef trackRef = muon.globalTrack();       //GLB muon              
+	      //const reco::TrackRef innerTrackRef = muon.innerTrack();   //tracker muon
+	      const reco::TrackRef outerTrackRef = muon.outerTrack();   //STA muon  
+
 	    
 
 	      float p2_in = track->innerMomentum().mag2();
@@ -364,11 +366,11 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
 		}
 	            
 	      bool is_incoming = p2_out > p2_in;
-	            
+
 	      const reco::TransientTrack&& transient_track = transient_track_builder->build(track);
 	      if (not transient_track.isValid()) 
 		{
-		  std::cout<<"failed  to build TransientTrack" << std::endl;
+		  std::cout<<"failed to build TransientTrack" << std::endl;
 		  continue;
 		}
 
@@ -376,19 +378,24 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
 	      const auto&& start_state = is_insideout ? transient_track.outermostMeasurementState() : transient_track.innermostMeasurementState();
 	      auto& propagator = is_incoming ? propagator_along : propagator_opposite;
 	     
-	      auto recHitMu = outerTrackRef->recHitsBegin();
-	      auto recHitMuEnd = outerTrackRef->recHitsEnd();     //STA muon
+	      //auto recHitMu = trackRef->recHitsBegin();           //GLB muon
+	      //auto recHitMu = innerTrackRef->recHitsBegin();      //tracker muon
+	      auto recHitMuEnd = outerTrackRef ->recHitsEnd();      //STA muon
 
-	      //auto recHitMu = trackRef->recHitsBegin(); //GLB muon
-	      //auto recHitMuEnd = trackRef->recHitsEnd();
-          
+	      //auto recHitMuEnd = innerTrackRef->recHitsEnd();     //tracker muon
+	      auto recHitMu = outerTrackRef->recHitsBegin();      //STA muon
+	      // auto recHitMuEnd = innerTrackerRef->recHitsEnd();     //STA muon
+
           const reco::HitPattern& htp = transient_track.hitPattern();
 
 	      for(; recHitMu != recHitMuEnd; ++recHitMu)
               {
                   DetId detId = (*recHitMu)->geographicalId();
                   if(detId.det() == DetId::Muon && detId.subdetId() == MuonSubdetId::GEM)
-                      {std::cout<<"GEM found in STA track"<<std::endl;}
+                      {
+                          // std::cout<<"InnermostZ = " << transient_track.innermostMeasurementState().globalPosition().z()<<std::endl;
+                          // std::cout<<"GEM found in STA track"<<std::endl;
+                      }
                   if(detId.det() == DetId::Muon && detId.subdetId() == MuonSubdetId::CSC)
                       {
                           isCSC = true;
@@ -466,6 +473,7 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
                                                           // PROPAGATION ON ETAP SURFACE
                                                           // The Z of the dest_state is fixed one the boundplane. x,y are actually evaluated by the propagator at that Z
                                                           const auto& dest_state = propagator_any->propagate(start_state,bound_plane);
+
                                                           //END PROPAGATION ON ETAP SURFACE
 
                                                           // // PROPAGATION IN THE DRIFT GAP
@@ -521,6 +529,8 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
                                                                   const double dest_global_phi_err = std::sqrt(dest_global_err.phierr(dest_global_pos));
                                                                   
                                                                   m_propagated_isME11.push_back(isME11);
+
+
 
                                                                   m_propagated_nME1hits.push_back(nME1_hits);
                                                                   m_propagated_nME2hits.push_back(nME2_hits);
