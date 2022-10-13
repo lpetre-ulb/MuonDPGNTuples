@@ -10,12 +10,8 @@ MuNtupleGEMVFATStatusFiller::MuNtupleGEMVFATStatusFiller(edm::ConsumesCollector 
 
   MuNtupleBaseFiller(config, tree, label)
 {
-
-  edm::InputTag & iTag = m_config->m_inputTags["gemOHStatus"];
-  if (iTag.label() != "none") m_gemOHStatusToken = collector.consumes<MuonDigiCollection<GEMDetId,GEMOHStatus>>(iTag);
-
- 
-
+    // I couldn't manage to get the GEM OH Status collections with the usual conditionalGet. So I have copied DQM https://github.com/cms-sw/cmssw/blob/38405a5b319be8ec094c981d6b45320aa577676a/DQM/GEM/plugins/GEMDAQStatusSource.cc#L9
+    m_gemOHStatusToken = collector.consumes<GEMOHStatusCollection>(edm::InputTag("muonGEMDigis", "OHStatus"));
 }
 
 MuNtupleGEMVFATStatusFiller::~MuNtupleGEMVFATStatusFiller()
@@ -72,49 +68,50 @@ void MuNtupleGEMVFATStatusFiller::fill(const edm::Event & ev)
   clear();
 
   const auto gem = m_config->m_gemGeometry;
-  auto OH_StatusCollection = conditionalGet<MuonDigiCollection<GEMDetId,GEMOHStatus>>(ev, m_gemOHStatusToken,"OHStatus");
+  edm::Handle<GEMOHStatusCollection> OH_StatusCollection;
+  ev.getByToken(m_gemOHStatusToken, OH_StatusCollection);
+  //auto OH_StatusCollection = conditionalGet<MuonDigiCollection<GEMDetId,GEMOHStatus>>(ev, m_gemOHStatusToken,"GEMOHStatusCollection");
 
   if (OH_StatusCollection.isValid())
-    {
-      for (auto ohIt = OH_StatusCollection->begin(); ohIt != OH_StatusCollection->end(); ohIt++) \
-	{
-	  const GEMDetId& gem_id = (*ohIt).first;
-	  const GEMOHStatusCollection::Range& range = (*ohIt).second;
+      { 
+          for (auto ohIt = OH_StatusCollection->begin(); ohIt != OH_StatusCollection->end(); ohIt++) \
+              {
+                  const GEMDetId& gem_id = (*ohIt).first;
+                  const GEMOHStatusCollection::Range& range = (*ohIt).second;
 
 
-      std::cout<<"Working on ohstatus region: " <<gem_id.region()<<"\tChamber: "<<gem_id.chamber()<<std::endl;
+                  const GEMEtaPartition* roll = gem->etaPartition(gem_id);
+                  const BoundPlane& surface = roll->surface();
 
-	  const GEMEtaPartition* roll = gem->etaPartition(gem_id);
-	  const BoundPlane& surface = roll->surface();
+                  for (auto digi = range.first; digi != range.second; ++digi) {
 
-	  for (auto digi = range.first; digi != range.second; ++digi) {
+                      m_digi_station.push_back(gem_id.station());
+                      m_digi_roll.push_back(gem_id.roll());
+                      // m_digi_strip.push_back(digi->strip());
+                      // m_digi_bx.push_back(digi->bx());
 
-	    m_digi_station.push_back(gem_id.station());
-	    m_digi_roll.push_back(gem_id.roll());
-	    // m_digi_strip.push_back(digi->strip());
-	    // m_digi_bx.push_back(digi->bx());
+                      // m_digi_region.push_back(gem_id.region());
 
-	    // m_digi_region.push_back(gem_id.region());
+                      // const LocalPoint& local_pos = roll->centreOfStrip(digi->strip());
+                      // const GlobalPoint& global_pos = surface.toGlobal(local_pos);
 
-	    // const LocalPoint& local_pos = roll->centreOfStrip(digi->strip());
-	    // const GlobalPoint& global_pos = surface.toGlobal(local_pos);
-
-	    // m_digi_g_r.push_back(global_pos.perp());
-	    // m_digi_g_phi.push_back(global_pos.phi());
-	    // m_digi_g_eta.push_back(global_pos.eta());
-	    // m_digi_g_x.push_back(global_pos.x());
-	    // m_digi_g_y.push_back(global_pos.y());
-	    // m_digi_g_z.push_back(global_pos.z());
+                      // m_digi_g_r.push_back(global_pos.perp());
+                      // m_digi_g_phi.push_back(global_pos.phi());
+                      // m_digi_g_eta.push_back(global_pos.eta());
+                      // m_digi_g_x.push_back(global_pos.x());
+                      // m_digi_g_y.push_back(global_pos.y());
+                      // m_digi_g_z.push_back(global_pos.z());
 	    
-	    m_nDigis++;
+                      m_nDigis++;
 	   
 
 	  }
 
 	}
       
-    }
-
+      }    
+  else{
+      std::cout<<"OH_Statuscollection is invalid"<<std::endl;}
   
   return;
 

@@ -41,7 +41,7 @@ class MuNtupleGEMVFATStatusFiller : public MuNtupleBaseFiller
   
   
   /// The digi token
-  edm::EDGetTokenT<MuonDigiCollection<GEMDetId,GEMOHStatus>> m_gemOHStatusToken;
+  edm::EDGetToken m_gemOHStatusToken;
   edm::ESGetToken<GEMGeometry, MuonGeometryRecord> geomToken_;
   /// The variables holding
   /// all digi related information
