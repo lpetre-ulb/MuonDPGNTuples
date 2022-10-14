@@ -14,7 +14,7 @@ cmsrel CMSSW_XXXX
 cd CMSSW_XXXX/src/ 
 cmsenv
 
-git clone --branch prod_CMSSW_12_2_1 https://github.com/gem-dpg-pfa/MuonDPGNTuples.git MuDPGAnalysis/MuonDPGNtuples
+git clone --branch GEMOHStatusCMSSW_12_6_X git@github.com:gem-dpg-pfa/MuonDPGNTuples.git MuDPGAnalysis/MuonDPGNtuples
 ```
 
 ### Compile
@@ -31,5 +31,3 @@ scram b -j 5
 - crab jobs fail because some of the data are not completely transferred.
 
 In these cases it is worth waiting ~24h and try again. If the jobs keep failing email the computing Computing Tools team
-
-
