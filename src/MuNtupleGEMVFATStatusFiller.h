@@ -3,13 +3,9 @@
 
 
 #include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleBaseFiller.h"
-
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
 #include "Geometry/GEMGeometry/interface/GEMGeometry.h"
-
-#include "DataFormats/GEMDigi/interface/GEMDigiCollection.h"
 #include "DataFormats/GEMDigi/interface/GEMOHStatusCollection.h"
-
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 
 #include <vector>
@@ -40,27 +36,17 @@ class MuNtupleGEMVFATStatusFiller : public MuNtupleBaseFiller
  private:
   
   
-  /// The digi token
+  /// The OHStatus token
   edm::EDGetToken m_gemOHStatusToken;
   edm::ESGetToken<GEMGeometry, MuonGeometryRecord> geomToken_;
   /// The variables holding
-  /// all digi related information
+  /// all OHStatus related information
 
-  unsigned int m_nDigis; // the # of digis (size of all following vectors)
-
-  std::vector<short>  m_digi_station;
-  std::vector<short>  m_digi_roll;
-  std::vector<short>  m_digi_strip;
-  std::vector<short>  m_digi_bx;
-  std::vector<short>  m_digi_region;
-  std::vector<short>  m_digi_pad;
-
-  std::vector<float> m_digi_g_r;
-  std::vector<float> m_digi_g_phi;
-  std::vector<float> m_digi_g_eta;
-  std::vector<float> m_digi_g_x;
-  std::vector<float> m_digi_g_y;
-  std::vector<float> m_digi_g_z;
+  std::vector<short> m_OHStatus_region;
+  std::vector<short> m_OHStatus_station;
+  std::vector<short> m_OHStatus_chamber;
+  std::vector<short> m_OHStatus_layer;
+  std::vector<short> m_OHStatus_VFATs;
 
 };
 

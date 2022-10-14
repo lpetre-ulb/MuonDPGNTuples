@@ -22,44 +22,23 @@ MuNtupleGEMVFATStatusFiller::~MuNtupleGEMVFATStatusFiller()
 void MuNtupleGEMVFATStatusFiller::initialize()
 {
 
-  m_tree->Branch((m_label + "_nDigis").c_str(), &m_nDigis, (m_label + "_nDigis/i").c_str());
+  m_tree->Branch((m_label + "_station").c_str(), &m_OHStatus_station);
+  m_tree->Branch((m_label + "_region").c_str(), &m_OHStatus_region);
+  m_tree->Branch((m_label + "_chamber").c_str(), &m_OHStatus_chamber);
+  m_tree->Branch((m_label + "_layer").c_str(), &m_OHStatus_layer);
+  m_tree->Branch((m_label + "_VFATMasked").c_str(), &m_OHStatus_VFATs);
 
-  m_tree->Branch((m_label + "_station").c_str(), &m_digi_station);
-  m_tree->Branch((m_label + "_region").c_str(), &m_digi_region);
-  m_tree->Branch((m_label + "_roll").c_str(), &m_digi_roll);
-  m_tree->Branch((m_label + "_bx").c_str(), &m_digi_bx);
-  m_tree->Branch((m_label + "_strip").c_str(), &m_digi_strip);
-  m_tree->Branch((m_label + "_pad").c_str(), &m_digi_pad);
-
-  m_tree->Branch((m_label + "_g_r").c_str(), &m_digi_g_r);
-  m_tree->Branch((m_label + "_g_phi").c_str(), &m_digi_g_phi);
-  m_tree->Branch((m_label + "g_eta").c_str(), &m_digi_g_eta);
-  m_tree->Branch((m_label + "_g_x").c_str(), &m_digi_g_x);
-  m_tree->Branch((m_label + "_g_y").c_str(), &m_digi_g_y);
-  m_tree->Branch((m_label + "_g_z").c_str(), &m_digi_g_z);
-  
 
 }
 
 void MuNtupleGEMVFATStatusFiller::clear()
 {
   
-  m_nDigis = 0;
-
-  m_digi_station.clear();
-  m_digi_roll.clear();
-  m_digi_strip.clear();
-  m_digi_bx.clear();
-  m_digi_region.clear();
-  m_digi_pad.clear();
-
-  m_digi_g_r.clear();
-  m_digi_g_phi.clear();
-  m_digi_g_eta.clear();
-  m_digi_g_x.clear();
-  m_digi_g_y.clear();
-  m_digi_g_z.clear();
-
+    m_OHStatus_region.clear();
+    m_OHStatus_station.clear();
+    m_OHStatus_chamber.clear();
+    m_OHStatus_layer.clear();
+    m_OHStatus_VFATs.clear();
 }
 
 void MuNtupleGEMVFATStatusFiller::fill(const edm::Event & ev)
@@ -70,12 +49,9 @@ void MuNtupleGEMVFATStatusFiller::fill(const edm::Event & ev)
   const auto gem = m_config->m_gemGeometry;
   edm::Handle<GEMOHStatusCollection> OH_StatusCollection;
   ev.getByToken(m_gemOHStatusToken, OH_StatusCollection);
-  //auto OH_StatusCollection = conditionalGet<MuonDigiCollection<GEMDetId,GEMOHStatus>>(ev, m_gemOHStatusToken,"GEMOHStatusCollection");
 
-  if (OH_StatusCollection.isValid())
-      { 
-          for (auto ohIt = OH_StatusCollection->begin(); ohIt != OH_StatusCollection->end(); ohIt++) \
-              {
+  if (OH_StatusCollection.isValid()){
+          for (auto ohIt = OH_StatusCollection->begin(); ohIt != OH_StatusCollection->end(); ohIt++){
                   const GEMDetId& gem_id = (*ohIt).first;
                   const GEMOHStatusCollection::Range &range = (*ohIt).second;
 
@@ -83,44 +59,46 @@ void MuNtupleGEMVFATStatusFiller::fill(const edm::Event & ev)
                   int station = gem_id.station();
                   int chamber = gem_id.chamber();
                   int layer = gem_id.layer();
-                  int etaPartition = gem_id.roll();
-
-                  
 
                   for (auto OHStatus = range.first; OHStatus != range.second; ++OHStatus) {
 
-                      const uint32_t missing = OHStatus->missingVFATs();
-                      std::cout<<"re: "<<region<<"\tch: "<<chamber<<"\tly: "<<layer<<"\tVFATMask: "<<std::endl;
-                  }
-                  // for (auto digi = range.first; digi != range.second; ++digi) {
+                      const uint32_t vfatMask = OHStatus->vfatMask();
+                      // TO DO: Understand how these two vars work
+                      // const uint32_t zsMask = OHStatus->vfatMask();
+                      // const uint32_t missingVFATs = OHStatus->missingVFATs(;)
 
-                  //     m_digi_station.push_back(gem_id.station());
-                  //     m_digi_roll.push_back(gem_id.roll());
-                      // m_digi_strip.push_back(digi->strip());
-                      // m_digi_bx.push_back(digi->bx());
 
-                      // m_digi_region.push_back(gem_id.region());
+                      // skip if all VFATs are valid i.e. vfatMask = FFFFFF
+                      if (vfatMask == 16777215) continue;
+                      else{
+                          std::bitset<24> vfatMaskbits(vfatMask);
+                          // std::bitset<24> zsMaskbits(zsMask);
+                          // std::bitset<24> missingVFATbits(missingVFATs);
+                          //std::cout<<"re: "<<region<<"\tch: "<<chamber<<"\tly: "<<layer<<"\tVFATMask: "<<vfatMaskbits<<std::endl;
+                          //std::cout<<"re: "<<region<<"\tch: "<<chamber<<"\tly: "<<layer<<"\tVFATMask: "<<vfatMaskbits<<"\tzsMask: "<<zsMaskbits.to_string()<<"\tmissingVFAT: "<<missingVFATbits.to_string()<<std::endl;
 
-                      // const LocalPoint& local_pos = roll->centreOfStrip(digi->strip());
-                      // const GlobalPoint& global_pos = surface.toGlobal(local_pos);
+                          // TODO: Improve conversion and vector filling
+                          int VFAT_Pos = 23;
+                          for(auto i: vfatMaskbits.to_string()){
+                              if (i == '0'){
+                                  m_OHStatus_station.push_back(station);
+                                  m_OHStatus_region.push_back(region);
+                                  m_OHStatus_chamber.push_back(chamber);
+                                  m_OHStatus_layer.push_back(layer);
+                                  //TODO: double check for VFAT position
+                                  m_OHStatus_VFATs.push_back(VFAT_Pos);
+                              }
+                                  
+                              VFAT_Pos--;
+                          }// Loop over VFAT Postions
+                      }//At least 1 masked VFAT   
+                  }//Loop over the OHStatus
+          }//Loop through the collection
+  }//OH_StatusCollection is valid
 
-                      // m_digi_g_r.push_back(global_pos.perp());
-                      // m_digi_g_phi.push_back(global_pos.phi());
-                      // m_digi_g_eta.push_back(global_pos.eta());
-                      // m_digi_g_x.push_back(global_pos.x());
-                      // m_digi_g_y.push_back(global_pos.y());
-                      // m_digi_g_z.push_back(global_pos.z());
-	    
-                      // m_nDigis++;
-	   
-
-                  // }
-
-              }
-      
-      }    
   else{
-      std::cout<<"OH_Statuscollection is invalid"<<std::endl;}
+      std::cout<<"OH_Statuscollection is invalid"<<std::endl;
+  }
   
   return;
 
