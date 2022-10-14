@@ -10,7 +10,7 @@ import sys
 options = VarParsing.VarParsing()
 
 options.register('globalTag',
-                 '123X_dataRun3_Prompt_v8',
+                 '124X_dataRun3_Prompt_v4',
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.string,
                  "Global Tag")
@@ -77,7 +77,8 @@ process.source = cms.Source("PoolSource",
 if "eos/cms" in options.inputFolder:
     #files = subprocess.check_output(['xrdfs', 'root://eoscms.cern.ch/', 'ls', options.inputFolder]) ## Did work with CMSSW 11XX, not anymore w CMSSW 12
     files = os.listdir(options.inputFolder)
-    process.source.fileNames = ["file:"+options.inputFolder + f for f in files if "550adffc-be62-45de-9a97-f514d3e49886.root" in f]
+    process.source.fileNames = ["file:/eos/cms/store/data/Run2022E/Muon/RAW/v1/000/359/685/00000/56068cd4-3552-41cb-a07f-05224a761eab.root"]
+    #process.source.fileNames = ["root://xrootd-cms.infn.it//store/data/Run2022D/Muon/RAW-RECO/ZMu-PromptReco-v2/000/357/734/00000/07a64f0e-25eb-40b6-b2a6-e8971a4e0ce8.root"]
 
 elif "/xrd/" in options.inputFolder:
     files = subprocess.check_output(['xrdfs', 'root://cms-xrdr.sdfarm.kr/', 'ls', options.inputFolder])
@@ -98,7 +99,7 @@ process.TFileService = cms.Service('TFileService',
 
 process.load('Configuration/StandardSequences/GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
-
+process.load('RecoLocalMuon.GEMRecHit.gemRecHits_cfi')
 process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAny_cfi')
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi')
@@ -111,4 +112,9 @@ process.p = cms.Path(process.muNtupleProducer)
 
 process.muNtupleProducer.isMC = cms.bool(options.isMC)
 
-process.p = cms.Path(process.muNtupleProducer)
+process.gemRecHits.ge21Off = cms.bool(False)
+process.p = cms.Path(
+    process.muonGEMDigis *
+    process.gemRecHits *
+    process.muNtupleProducer)
+
