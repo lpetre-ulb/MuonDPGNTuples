@@ -69,7 +69,11 @@ void MuNtupleGEMVFATStatusFiller::fill(const edm::Event & ev)
 
 
                       // skip if all VFATs are valid i.e. vfatMask = FFFFFF
-                      if (vfatMask == 16777215) continue;
+                      if (vfatMask == 16777215) 
+                        {   
+                            continue;
+                        }
+                        
                       else{
                           std::bitset<24> vfatMaskbits(vfatMask);
                           // std::bitset<24> zsMaskbits(zsMask);

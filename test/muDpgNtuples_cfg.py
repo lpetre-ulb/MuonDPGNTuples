@@ -26,7 +26,17 @@ options.register('isMC',
                  False, #default value
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.bool,
-                 "Maximum number of processed events")
+                 "Dataset is MC")
+options.register('SaveVFATStatus',
+                 True, #default value
+                 VarParsing.VarParsing.multiplicity.singleton,
+                 VarParsing.VarParsing.varType.bool,
+                 "Save VFAT status info from unpacker")
+options.register('GE21',
+                 True, #default value
+                 VarParsing.VarParsing.multiplicity.singleton,
+                 VarParsing.VarParsing.varType.bool,
+                 "Save GE21 data in the ntuples")
 
 options.register('inputFolder',
                  #/eos/cms/store/
@@ -80,7 +90,7 @@ if "eos/cms" in options.inputFolder:
     #files = subprocess.check_output(['xrdfs', 'root://eoscms.cern.ch/', 'ls', options.inputFolder]) ## Did work with CMSSW 11XX, not anymore w CMSSW 12
     files = os.listdir(options.inputFolder)
     #process.source.fileNames = ["file:"+options.inputFolder + f for f in files if "07a64f0e-25eb-40b6-b2a6-e8971a4e0ce8.root" in f]
-    process.source.fileNames = ["root://xrootd-cms.infn.it//store/data/Run2022D/Muon/RAW-RECO/ZMu-PromptReco-v2/000/357/734/00000/07a64f0e-25eb-40b6-b2a6-e8971a4e0ce8.root"]
+    process.source.fileNames = ["root://xrootd-cms.infn.it//store/data/Run2022E/Muon/RAW-RECO/ZMu-PromptReco-v1/000/360/019/00001/4933b7ab-622b-4b80-87ee-8165f976a332.root"]
 
 elif "/xrd/" in options.inputFolder:
     files = subprocess.check_output(['xrdfs', 'root://cms-xrdr.sdfarm.kr/', 'ls', options.inputFolder])
@@ -101,7 +111,7 @@ process.TFileService = cms.Service('TFileService',
 
 process.load('Configuration/StandardSequences/GeometryRecoDB_cff')
 process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
-
+process.load('RecoLocalMuon.GEMRecHit.gemRecHits_cfi')
 process.load("TrackingTools/TransientTrack/TransientTrackBuilder_cfi")
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAny_cfi')
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi')
@@ -113,8 +123,35 @@ process.load('MuDPGAnalysis.MuonDPGNtuples.muNtupleProducer_cfi')
 
 
 process.muNtupleProducer.isMC = cms.bool(options.isMC)
+process.muNtupleProducer.SaveVFATStatus = cms.bool(options.SaveVFATStatus)
 
-process.p = cms.Path(
-    process.muonGEMDigis
-    + process.muNtupleProducer
-)
+if options.SaveVFATStatus:
+    processDigi = True
+
+    if options.GE21:
+        processRechit = True
+    else:
+        processRechit = False
+else:
+    processDigi = False
+    processRechit = False
+
+    if options.GE21:
+        processDigi = True
+        processRechit = True
+        
+
+
+if processRechit:
+    process.gemRecHits.ge21Off = cms.bool(False)
+    process.p = cms.Path(
+        process.muonGEMDigis *
+        process.gemRecHits *
+        process.muNtupleProducer)
+elif processDigi and not processRechit:
+    process.p = cms.Path(
+        process.muonGEMDigis *
+        process.muNtupleProducer)
+else:
+    process.p = cms.Path(
+        process.muNtupleProducer)

@@ -47,6 +47,7 @@ MuNtupleProducer::MuNtupleProducer( const edm::ParameterSet & config )
   usesResource("TFileService");
   edm::Service<TFileService> fileService;
   bool isMC = static_cast<bool>(config.getParameter<bool>("isMC"));
+  bool SaveVFATStatus = static_cast<bool>(config.getParameter<bool>("SaveVFATStatus"));
   m_tree = std::shared_ptr<TTree>(fileService->make<TTree>("MuDPGTree","Mu DPG Tree"));
   
   
@@ -60,8 +61,8 @@ MuNtupleProducer::MuNtupleProducer( const edm::ParameterSet & config )
   //m_fillers.push_back(std::make_unique<MuNtupleDTSegmentFiller>(consumesCollector(), m_config, m_tree, "dtSeg",    MuNtupleDTSegmentFiller::Tag::PH1));
   //m_fillers.push_back(std::make_unique<MuNtupleDTSegmentFiller>(consumesCollector(), m_config, m_tree, "ph2DtSeg", MuNtupleDTSegmentFiller::Tag::PH2));
   
-  m_fillers.push_back(std::make_unique<MuNtupleGEMDigiFiller>(consumesCollector(), m_config, m_tree, "gemDigi"));
-  m_fillers.push_back(std::make_unique<MuNtupleGEMVFATStatusFiller>(consumesCollector(),m_config,m_tree,"gemOHStatus"));
+  // m_fillers.push_back(std::make_unique<MuNtupleGEMDigiFiller>(consumesCollector(), m_config, m_tree, "gemDigi"));
+  if (SaveVFATStatus) m_fillers.push_back(std::make_unique<MuNtupleGEMVFATStatusFiller>(consumesCollector(),m_config,m_tree,"gemOHStatus"));
   
   m_fillers.push_back(std::make_unique<MuNtupleGEMRecHitFiller>(consumesCollector(), m_config, m_tree, "gemRecHit"));
 
