@@ -29,22 +29,22 @@ if args.Dataset == 'Express':
     unitsPerJob = 20
     fileSplitting = "FileBased"
 elif args.Dataset == 'Prompt':
-    globalTag = '123X_dataRun3_Prompt_v8'
+    globalTag = '124X_dataRun3_Prompt_v4'
     inputDataset = ['/Muon/Run2022C-PromptReco-v1/AOD']
     unitsPerJob = 20
     fileSplitting = "FileBased"
 elif args.Dataset == 'ZeroBias':
-    globalTag = '123X_dataRun3_Prompt_v8'
+    globalTag = '124X_dataRun3_Prompt_v4'
     inputDataset = ["/ZeroBias/Run2022C-PromptReco-v1/AOD"]#['/ZeroBias'+str(i)+'/Run2022B-PromptReco-v1/AOD' for i in range(20)]
     unitsPerJob = 1
     fileSplitting = "FileBased"
 elif args.Dataset == 'ZMu':
-    globalTag = '123X_dataRun3_Prompt_v8'
+    globalTag = '124X_dataRun3_Prompt_v4'
     inputDataset = ['/Muon/Run2022E-ZMu-PromptReco-v1/RAW-RECO']
     unitsPerJob = 5
     fileSplitting = "FileBased"
 elif args.Dataset == 'MinimumBias':
-    globalTag = '123X_dataRun3_Prompt_v8'
+    globalTag = '124X_dataRun3_Prompt_v4'
     inputDataset = ['/MinimumBias/Run2022B-PromptReco-v1/AOD']
     unitsPerJob = 1
     fileSplitting = "FileBased"
