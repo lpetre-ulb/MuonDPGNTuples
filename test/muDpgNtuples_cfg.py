@@ -71,7 +71,7 @@ process = cms.Process("MUNTUPLES",eras.Run3)#Run2_2018)
 
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
-
+#SkipEvent = cms.untracked.vstring('ProductNotFound')
 process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True))
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(options.nEvents))
