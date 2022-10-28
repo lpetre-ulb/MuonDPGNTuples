@@ -46,7 +46,8 @@ class MuNtupleGEMVFATStatusFiller : public MuNtupleBaseFiller
   std::vector<short> m_OHStatus_station;
   std::vector<short> m_OHStatus_chamber;
   std::vector<short> m_OHStatus_layer;
-  std::vector<short> m_OHStatus_VFATs;
+  std::vector<short> m_OHStatus_VFATMasked;
+  std::vector<short> m_OHStatus_VFATZS;
 
 };
 

@@ -23,7 +23,8 @@ void MuNtupleGEMVFATStatusFiller::initialize()
     m_tree->Branch((m_label + "_region").c_str(), &m_OHStatus_region);
     m_tree->Branch((m_label + "_chamber").c_str(), &m_OHStatus_chamber);
     m_tree->Branch((m_label + "_layer").c_str(), &m_OHStatus_layer);
-    m_tree->Branch((m_label + "_VFATMasked").c_str(), &m_OHStatus_VFATs);
+    m_tree->Branch((m_label + "_VFATMasked").c_str(), &m_OHStatus_VFATMasked);
+    m_tree->Branch((m_label + "_VFATZS").c_str(), &m_OHStatus_VFATZS);
 }
 
 void MuNtupleGEMVFATStatusFiller::clear()
@@ -32,7 +33,8 @@ void MuNtupleGEMVFATStatusFiller::clear()
     m_OHStatus_station.clear();
     m_OHStatus_chamber.clear();
     m_OHStatus_layer.clear();
-    m_OHStatus_VFATs.clear();
+    m_OHStatus_VFATMasked.clear();
+    m_OHStatus_VFATZS.clear();
 }
 
 void MuNtupleGEMVFATStatusFiller::fill(const edm::Event &ev)
@@ -60,9 +62,8 @@ void MuNtupleGEMVFATStatusFiller::fill(const edm::Event &ev)
             {
 
                 const uint32_t vfatMask = OHStatus->vfatMask();
-                // TO DO: Understand how these two vars work
-                // const uint32_t zsMask = OHStatus->vfatMask();
-                // const uint32_t missingVFATs = OHStatus->missingVFATs(;)
+                const uint32_t zsMask = OHStatus->zsMask();
+                // const uint32_t missingVFATs = OHStatus->missingVFATs();
 
                 // skip if all VFATs are valid i.e. vfatMask = FFFFFF
                 if (vfatMask == 16777215)
@@ -73,7 +74,13 @@ void MuNtupleGEMVFATStatusFiller::fill(const edm::Event &ev)
                 else
                 {
                     std::bitset<24> vfatMaskbits(vfatMask);
-                    // std::bitset<24> zsMaskbits(zsMask);
+                    std::bitset<24> zsMaskbits(zsMask);
+                    const auto zsString = zsMaskbits.to_string();
+
+                    short MaskedVFAT = -2;
+                    short ZSVFAT = -2;
+
+
                     // std::bitset<24> missingVFATbits(missingVFATs);
                     // std::cout<<"re: "<<region<<"\tch: "<<chamber<<"\tly: "<<layer<<"\tVFATMask: "<<vfatMaskbits<<std::endl;
                     // std::cout<<"re: "<<region<<"\tch: "<<chamber<<"\tly: "<<layer<<"\tVFATMask: "<<vfatMaskbits<<"\tzsMask: "<<zsMaskbits.to_string()<<"\tmissingVFAT: "<<missingVFATbits.to_string()<<std::endl;
@@ -81,16 +88,20 @@ void MuNtupleGEMVFATStatusFiller::fill(const edm::Event &ev)
                     // TODO: Improve conversion and vector filling
                     int VFAT_Pos = 23;
                     for (auto i : vfatMaskbits.to_string())
-                    {
-                        if (i == '0')
-                        {
-                            m_OHStatus_station.push_back(station);
-                            m_OHStatus_region.push_back(region);
-                            m_OHStatus_chamber.push_back(chamber);
-                            m_OHStatus_layer.push_back(layer);
-                            // TODO: double check for VFAT position
-                            m_OHStatus_VFATs.push_back(VFAT_Pos);
-                        }
+                    {                        
+                        if (i == '0')  MaskedVFAT = VFAT_Pos;                                                      
+                        else MaskedVFAT = -1;
+
+                        if (zsString[23-VFAT_Pos] == '1') ZSVFAT = VFAT_Pos;
+                        else ZSVFAT = -1;
+
+                        m_OHStatus_station.push_back(station);
+                        m_OHStatus_region.push_back(region);
+                        m_OHStatus_chamber.push_back(chamber);
+                        m_OHStatus_layer.push_back(layer);
+                        // TODO: double check for VFAT position
+                        m_OHStatus_VFATMasked.push_back(MaskedVFAT);
+                        m_OHStatus_VFATZS.push_back(ZSVFAT);
 
                         VFAT_Pos--;
                     } // Loop over VFAT Postions
