@@ -12,8 +12,7 @@ MuNtupleGEMVFATStatusFiller::MuNtupleGEMVFATStatusFiller(edm::ConsumesCollector 
     m_gemOHStatusToken = collector.consumes<GEMOHStatusCollection>(edm::InputTag("muonGEMDigis", "OHStatus"));
 }
 
-MuNtupleGEMVFATStatusFiller::~MuNtupleGEMVFATStatusFiller()
-{
+MuNtupleGEMVFATStatusFiller::~MuNtupleGEMVFATStatusFiller(){
 
 };
 
@@ -25,6 +24,9 @@ void MuNtupleGEMVFATStatusFiller::initialize()
     m_tree->Branch((m_label + "_layer").c_str(), &m_OHStatus_layer);
     m_tree->Branch((m_label + "_VFATMasked").c_str(), &m_OHStatus_VFATMasked);
     m_tree->Branch((m_label + "_VFATZS").c_str(), &m_OHStatus_VFATZS);
+    m_tree->Branch((m_label + "_VFATMissing").c_str(), &m_OHStatus_VFATMissing);
+    m_tree->Branch((m_label + "_errors").c_str(), &m_OHStatus_errors);
+    m_tree->Branch((m_label + "warnings").c_str(), &m_OHStatus_warnings);
 }
 
 void MuNtupleGEMVFATStatusFiller::clear()
@@ -35,6 +37,9 @@ void MuNtupleGEMVFATStatusFiller::clear()
     m_OHStatus_layer.clear();
     m_OHStatus_VFATMasked.clear();
     m_OHStatus_VFATZS.clear();
+    m_OHStatus_VFATMissing.clear();
+    m_OHStatus_errors.clear();
+    m_OHStatus_warnings.clear();
 }
 
 void MuNtupleGEMVFATStatusFiller::fill(const edm::Event &ev)
@@ -57,58 +62,53 @@ void MuNtupleGEMVFATStatusFiller::fill(const edm::Event &ev)
             int station = gem_id.station();
             int chamber = gem_id.chamber();
             int layer = gem_id.layer();
-
+            int module = 0;
             for (auto OHStatus = range.first; OHStatus != range.second; ++OHStatus)
             {
 
+                // vfatmask == 0 ==> VFAT was masked
+                // zsmaks == 1   ==> VFAT was ZeroSuppressed
+                // missingVFAT ==> 1 VFAT is missing (should be there but it is not)
+                // existVFATs ==> 0 VFAT exists
                 const uint32_t vfatMask = OHStatus->vfatMask();
                 const uint32_t zsMask = OHStatus->zsMask();
-                // const uint32_t missingVFATs = OHStatus->missingVFATs();
+                const uint32_t missingVFATs = OHStatus->missingVFATs();
+                const uint32_t existVFATs = OHStatus->existVFATs();
+                const uint16_t errors = OHStatus->errors();
+                const uint8_t warnings = OHStatus->warnings();
+                
 
-                // skip if all VFATs are valid i.e. vfatMask = FFFFFF
-                if (vfatMask == 16777215)
+                std::bitset<24> vfatMaskbits(vfatMask);
+                std::bitset<24> zsMaskbits(zsMask);
+                std::bitset<24> missingVFATbits(missingVFATs);
+                std::bitset<24> existVFATbits(existVFATs);
+
+                // std::cout << "st:" << station << "\tre: " << region << "\tch: " << chamber << "\tly: " << module << "\tModule: " << 3 << "\n\tVFATMask: " << vfatMaskbits.to_string() << "\n\tzsMask: " << zsMaskbits.to_string() << "\n\tmissingVFAT: " << missingVFATbits.to_string() << "\n\texistVFATbits: " << existVFATbits.to_string() << std::endl;
+                // std::cin.get();
+                // skip if  no VFAT masked, ZS nor missing
+                if (vfatMask == 16777215 && zsMask == 0 && missingVFATs == 0 && errors == 0 && warnings == 0)
                 {
                     continue;
                 }
 
                 else
                 {
-                    std::bitset<24> vfatMaskbits(vfatMask);
-                    std::bitset<24> zsMaskbits(zsMask);
-                    const auto zsString = zsMaskbits.to_string();
 
-                    short MaskedVFAT = -2;
-                    short ZSVFAT = -2;
+                    m_OHStatus_station.push_back(station);
+                    m_OHStatus_region.push_back(region);
+                    m_OHStatus_chamber.push_back(chamber);
+                    m_OHStatus_layer.push_back(layer);
+                    // TODO: double check for VFAT position
+                    m_OHStatus_VFATMasked.push_back(vfatMask);
+                    m_OHStatus_VFATZS.push_back(zsMask);
+                    m_OHStatus_VFATMissing.push_back(missingVFATs);
+                    m_OHStatus_errors.push_back(errors);
+                    m_OHStatus_warnings.push_back(warnings);
 
-
-                    // std::bitset<24> missingVFATbits(missingVFATs);
-                    // std::cout<<"re: "<<region<<"\tch: "<<chamber<<"\tly: "<<layer<<"\tVFATMask: "<<vfatMaskbits<<std::endl;
-                    // std::cout<<"re: "<<region<<"\tch: "<<chamber<<"\tly: "<<layer<<"\tVFATMask: "<<vfatMaskbits<<"\tzsMask: "<<zsMaskbits.to_string()<<"\tmissingVFAT: "<<missingVFATbits.to_string()<<std::endl;
-
-                    // TODO: Improve conversion and vector filling
-                    int VFAT_Pos = 23;
-                    for (auto i : vfatMaskbits.to_string())
-                    {                        
-                        if (i == '0')  MaskedVFAT = VFAT_Pos;                                                      
-                        else MaskedVFAT = -1;
-
-                        if (zsString[23-VFAT_Pos] == '1') ZSVFAT = VFAT_Pos;
-                        else ZSVFAT = -1;
-
-                        m_OHStatus_station.push_back(station);
-                        m_OHStatus_region.push_back(region);
-                        m_OHStatus_chamber.push_back(chamber);
-                        m_OHStatus_layer.push_back(layer);
-                        // TODO: double check for VFAT position
-                        m_OHStatus_VFATMasked.push_back(MaskedVFAT);
-                        m_OHStatus_VFATZS.push_back(ZSVFAT);
-
-                        VFAT_Pos--;
-                    } // Loop over VFAT Postions
-                }     // At least 1 masked VFAT
-            }         // Loop over the OHStatus
-        }             // Loop through the collection
-    }                 // OH_StatusCollection is valid
+                } // At least 1 masked VFAT
+            }     // Loop over the OHStatus
+        }         // Loop through the collection
+    }             // OH_StatusCollection is valid
 
     else
     {

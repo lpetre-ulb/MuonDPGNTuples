@@ -9,7 +9,6 @@
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 
 #include <vector>
-
 class MuNtupleGEMVFATStatusFiller : public MuNtupleBaseFiller
 {
  public: 
@@ -46,8 +45,13 @@ class MuNtupleGEMVFATStatusFiller : public MuNtupleBaseFiller
   std::vector<short> m_OHStatus_station;
   std::vector<short> m_OHStatus_chamber;
   std::vector<short> m_OHStatus_layer;
-  std::vector<short> m_OHStatus_VFATMasked;
-  std::vector<short> m_OHStatus_VFATZS;
+  std::vector<uint32_t> m_OHStatus_VFATMasked;
+  std::vector<uint32_t> m_OHStatus_VFATZS;
+  std::vector<uint32_t> m_OHStatus_VFATMissing;
+  std::vector<uint32_t> m_OHStatus_existVFAT;
+  std::vector<uint16_t> m_OHStatus_errors;
+  std::vector<uint8_t> m_OHStatus_warnings;
+  
 
 };
 
