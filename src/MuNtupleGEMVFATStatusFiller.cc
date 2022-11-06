@@ -26,7 +26,7 @@ void MuNtupleGEMVFATStatusFiller::initialize()
     m_tree->Branch((m_label + "_VFATZS").c_str(), &m_OHStatus_VFATZS);
     m_tree->Branch((m_label + "_VFATMissing").c_str(), &m_OHStatus_VFATMissing);
     m_tree->Branch((m_label + "_errors").c_str(), &m_OHStatus_errors);
-    m_tree->Branch((m_label + "warnings").c_str(), &m_OHStatus_warnings);
+    m_tree->Branch((m_label + "_warnings").c_str(), &m_OHStatus_warnings);
 }
 
 void MuNtupleGEMVFATStatusFiller::clear()
@@ -75,7 +75,8 @@ void MuNtupleGEMVFATStatusFiller::fill(const edm::Event &ev)
                 const uint32_t missingVFATs = OHStatus->missingVFATs();
                 const uint32_t existVFATs = OHStatus->existVFATs();
                 const uint16_t errors = OHStatus->errors();
-                const uint8_t warnings = OHStatus->warnings();
+                const uint16_t warnings = OHStatus->warnings();
+                std::cout<<warnings<<std::endl;
                 
 
                 std::bitset<24> vfatMaskbits(vfatMask);
