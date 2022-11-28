@@ -22,6 +22,7 @@ void MuNtupleGEMVFATStatusFiller::initialize()
     m_tree->Branch((m_label + "_region").c_str(), &m_OHStatus_region);
     m_tree->Branch((m_label + "_chamber").c_str(), &m_OHStatus_chamber);
     m_tree->Branch((m_label + "_layer").c_str(), &m_OHStatus_layer);
+    m_tree->Branch((m_label + "_chamberType").c_str(), &m_OHStatus_chamberType);
     m_tree->Branch((m_label + "_VFATMasked").c_str(), &m_OHStatus_VFATMasked);
     m_tree->Branch((m_label + "_VFATZS").c_str(), &m_OHStatus_VFATZS);
     m_tree->Branch((m_label + "_VFATMissing").c_str(), &m_OHStatus_VFATMissing);
@@ -35,6 +36,7 @@ void MuNtupleGEMVFATStatusFiller::clear()
     m_OHStatus_station.clear();
     m_OHStatus_chamber.clear();
     m_OHStatus_layer.clear();
+    m_OHStatus_chamberType.clear();
     m_OHStatus_VFATMasked.clear();
     m_OHStatus_VFATZS.clear();
     m_OHStatus_VFATMissing.clear();
@@ -62,7 +64,6 @@ void MuNtupleGEMVFATStatusFiller::fill(const edm::Event &ev)
             int station = gem_id.station();
             int chamber = gem_id.chamber();
             int layer = gem_id.layer();
-            int module = 0;
             for (auto OHStatus = range.first; OHStatus != range.second; ++OHStatus)
             {
 
@@ -76,8 +77,8 @@ void MuNtupleGEMVFATStatusFiller::fill(const edm::Event &ev)
                 const uint32_t existVFATs = OHStatus->existVFATs();
                 const uint16_t errors = OHStatus->errors();
                 const uint16_t warnings = OHStatus->warnings();
-                std::cout<<warnings<<std::endl;
-                
+                const int chamberType = OHStatus->chamberType();
+
 
                 std::bitset<24> vfatMaskbits(vfatMask);
                 std::bitset<24> zsMaskbits(zsMask);
@@ -99,6 +100,7 @@ void MuNtupleGEMVFATStatusFiller::fill(const edm::Event &ev)
                     m_OHStatus_region.push_back(region);
                     m_OHStatus_chamber.push_back(chamber);
                     m_OHStatus_layer.push_back(layer);
+                    m_OHStatus_chamberType.push_back(chamberType);
                     // TODO: double check for VFAT position
                     m_OHStatus_VFATMasked.push_back(vfatMask);
                     m_OHStatus_VFATZS.push_back(zsMask);
