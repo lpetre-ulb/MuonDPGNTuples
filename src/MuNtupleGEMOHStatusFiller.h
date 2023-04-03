@@ -1,5 +1,5 @@
-#ifndef MuNtuple_MuNtupleGEMVFATStatusFiller_h
-#define MuNtuple_MuNtupleGEMVFATStatusFiller_h
+#ifndef MuNtuple_MuNtupleGEMOHStatusFiller_h
+#define MuNtuple_MuNtupleGEMOHStatusFiller_h
 
 
 #include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleBaseFiller.h"
@@ -7,20 +7,21 @@
 #include "Geometry/GEMGeometry/interface/GEMGeometry.h"
 #include "DataFormats/GEMDigi/interface/GEMOHStatusCollection.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
+#include "DataFormats/GEMDigi/interface/GEMAMC.h"
 
 #include <vector>
-class MuNtupleGEMVFATStatusFiller : public MuNtupleBaseFiller
+class MuNtupleGEMOHStatusFiller : public MuNtupleBaseFiller
 {
  public: 
 
   //Constructor
-  MuNtupleGEMVFATStatusFiller(edm::ConsumesCollector && collector,
+  MuNtupleGEMOHStatusFiller(edm::ConsumesCollector && collector,
                       const std::shared_ptr<MuNtupleConfig> config,
                       std::shared_ptr<TTree> tree, const std::string & label);
 
   
   //Destructor
-  virtual ~MuNtupleGEMVFATStatusFiller();
+  virtual ~MuNtupleGEMOHStatusFiller();
 
   /// Intialize function : setup tree branches etc ...
   virtual void initialize() final;

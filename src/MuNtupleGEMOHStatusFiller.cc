@@ -1,10 +1,10 @@
-#include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMVFATStatusFiller.h"
+#include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMOHStatusFiller.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 
-MuNtupleGEMVFATStatusFiller::MuNtupleGEMVFATStatusFiller(edm::ConsumesCollector &&collector,
+MuNtupleGEMOHStatusFiller::MuNtupleGEMOHStatusFiller(edm::ConsumesCollector &&collector,
                                                          const std::shared_ptr<MuNtupleConfig> config,
                                                          std::shared_ptr<TTree> tree, const std::string &label) : MuNtupleBaseFiller(config, tree, label)
 {
@@ -12,11 +12,11 @@ MuNtupleGEMVFATStatusFiller::MuNtupleGEMVFATStatusFiller(edm::ConsumesCollector 
     m_gemOHStatusToken = collector.consumes<GEMOHStatusCollection>(edm::InputTag("muonGEMDigis", "OHStatus"));
 }
 
-MuNtupleGEMVFATStatusFiller::~MuNtupleGEMVFATStatusFiller(){
+MuNtupleGEMOHStatusFiller::~MuNtupleGEMOHStatusFiller(){
 
 };
 
-void MuNtupleGEMVFATStatusFiller::initialize()
+void MuNtupleGEMOHStatusFiller::initialize()
 {
     m_tree->Branch((m_label + "_station").c_str(), &m_OHStatus_station);
     m_tree->Branch((m_label + "_region").c_str(), &m_OHStatus_region);
@@ -30,7 +30,7 @@ void MuNtupleGEMVFATStatusFiller::initialize()
     m_tree->Branch((m_label + "_warnings").c_str(), &m_OHStatus_warnings);
 }
 
-void MuNtupleGEMVFATStatusFiller::clear()
+void MuNtupleGEMOHStatusFiller::clear()
 {
     m_OHStatus_region.clear();
     m_OHStatus_station.clear();
@@ -44,7 +44,7 @@ void MuNtupleGEMVFATStatusFiller::clear()
     m_OHStatus_warnings.clear();
 }
 
-void MuNtupleGEMVFATStatusFiller::fill(const edm::Event &ev)
+void MuNtupleGEMOHStatusFiller::fill(const edm::Event &ev)
 {
 
     clear();
@@ -80,35 +80,26 @@ void MuNtupleGEMVFATStatusFiller::fill(const edm::Event &ev)
                 const int chamberType = OHStatus->chamberType();
 
 
-                std::bitset<24> vfatMaskbits(vfatMask);
-                std::bitset<24> zsMaskbits(zsMask);
-                std::bitset<24> missingVFATbits(missingVFATs);
-                std::bitset<24> existVFATbits(existVFATs);
-
+                // std::bitset<24> vfatMaskbits(vfatMask);
+                // std::bitset<24> zsMaskbits(zsMask);
+                // std::bitset<24> missingVFATbits(missingVFATs);
+                // std::bitset<24> existVFATbits(existVFATs);
                 // std::cout << "st:" << station << "\tre: " << region << "\tch: " << chamber << "\tly: " << module << "\tModule: " << 3 << "\n\tVFATMask: " << vfatMaskbits.to_string() << "\n\tzsMask: " << zsMaskbits.to_string() << "\n\tmissingVFAT: " << missingVFATbits.to_string() << "\n\texistVFATbits: " << existVFATbits.to_string() << std::endl;
-                // std::cin.get();
-                // skip if  no VFAT masked, ZS nor missing
-                if (vfatMask == 16777215 && zsMask == 0 && missingVFATs == 0 && errors == 0 && warnings == 0)
-                {
-                    continue;
-                }
+                
 
-                else
-                {
+                m_OHStatus_station.push_back(station);
+                m_OHStatus_region.push_back(region);
+                m_OHStatus_chamber.push_back(chamber);
+                m_OHStatus_layer.push_back(layer);
+                m_OHStatus_chamberType.push_back(chamberType);
+                // TODO: double check for VFAT position
+                m_OHStatus_VFATMasked.push_back(vfatMask);
+                m_OHStatus_VFATZS.push_back(zsMask);
+                m_OHStatus_VFATMissing.push_back(missingVFATs);
+                m_OHStatus_errors.push_back(errors);
+                m_OHStatus_warnings.push_back(warnings);
 
-                    m_OHStatus_station.push_back(station);
-                    m_OHStatus_region.push_back(region);
-                    m_OHStatus_chamber.push_back(chamber);
-                    m_OHStatus_layer.push_back(layer);
-                    m_OHStatus_chamberType.push_back(chamberType);
-                    // TODO: double check for VFAT position
-                    m_OHStatus_VFATMasked.push_back(vfatMask);
-                    m_OHStatus_VFATZS.push_back(zsMask);
-                    m_OHStatus_VFATMissing.push_back(missingVFATs);
-                    m_OHStatus_errors.push_back(errors);
-                    m_OHStatus_warnings.push_back(warnings);
-
-                } // At least 1 masked VFAT
+              //} // At least 1 masked VFAT
             }     // Loop over the OHStatus
         }         // Loop through the collection
     }             // OH_StatusCollection is valid
