@@ -16,7 +16,7 @@ options.register('globalTag',
                  "Global Tag")
 
 options.register('nEvents',
-                 -1, #to run on a sub-sample
+                 1000, #to run on a sub-sample
                  #-1, #default value
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.int,
@@ -27,21 +27,35 @@ options.register('isMC',
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.bool,
                  "Dataset is MC")
-options.register('SaveVFATStatus',
+
+options.register('reUnpack',
                  True, #default value
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.bool,
-                 "Save VFAT status info from unpacker")
+                 "enables reprocessing of digis: i.e OHStatus is not stored in RECO datesets, but can be extracted by re-unpacking data from a RAW dataset.")
+
+options.register('storeOHStatus',
+                 True, #default value
+                 VarParsing.VarParsing.multiplicity.singleton,
+                 VarParsing.VarParsing.varType.bool,
+                 "Save OH status info from unpacker")
+
+options.register('storeAMCStatus',
+                 True, #default value
+                 VarParsing.VarParsing.multiplicity.singleton,
+                 VarParsing.VarParsing.varType.bool,
+                 "Save AMC status info from unpacker")
+
 options.register('GE21',
-                 True, #default value
+                 False, #default value
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.bool,
-                 "Save GE21 data in the ntuples")
+                 "enables storing of GE21 rechits, disabled by default in CMSSW: i.e when running on a RAW dataset it's possible to reprocess digi and build GE21 rechits and save them in the ntuples")
 
 options.register('inputFolder',
                  #/eos/cms/store/
                  #"/eos/cms/store/data/Run2022D/Muon/RAW-RECO/ZMu-PromptReco-v2/000/357/734/00000/",
-                 "/eos/cms/store/data/Run2022D/Muon/RAW/v1/000/357/542/00000/",
+                 "/eos/cms/store/group/dpg_gem/comm_gem/reRECO/Muon/crab_gemReReco_hv_re3/230213_023322/0000/",
                  #"/eos/cms/store/group/dpg_gem/comm_gem/reRECO/SingleMuon/GEM-reRECO-GEM-only__Run2022B-ZMu-PromptReco-v1__RAW-RECO/220721_151149/0000/",
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.string,
@@ -76,6 +90,7 @@ process.options   = cms.untracked.PSet( wantSummary = cms.untracked.bool(True))
 process.MessageLogger.cerr.FwkReport.reportEvery = 100
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(options.nEvents))
 
+
 #process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_condDBv2_cff')
 
 process.GlobalTag.globaltag = cms.string(options.globalTag)
@@ -90,7 +105,7 @@ if "eos/cms" in options.inputFolder:
     #files = subprocess.check_output(['xrdfs', 'root://eoscms.cern.ch/', 'ls', options.inputFolder]) ## Did work with CMSSW 11XX, not anymore w CMSSW 12
     files = os.listdir(options.inputFolder)
     #process.source.fileNames = ["file:"+options.inputFolder + f for f in files if "07a64f0e-25eb-40b6-b2a6-e8971a4e0ce8.root" in f]
-    process.source.fileNames = ["root://xrootd-cms.infn.it//store/data/Run2022E/Muon/RAW-RECO/ZMu-PromptReco-v1/000/360/019/00001/4933b7ab-622b-4b80-87ee-8165f976a332.root"]
+    process.source.fileNames = ['file:/eos/cms/store/data/Run2022E/Muon/RAW-RECO/ZMu-10Dec2022-v2/330000/159d8e9d-7887-4543-a637-203f4c874c48.root']#"file:/eos/cms/store/group/dpg_gem/comm_gem/reRECO/Muon/crab_gemReReco_hv_re3/230213_023322/0000/step3_35.root"]#@["root://xrootd-cms.infn.it//store/data/Run2022E/Muon/RAW-RECO/ZMu-PromptReco-v1/000/360/019/00001/4933b7ab-622b-4b80-87ee-8165f976a332.root"]
 
 elif "/xrd/" in options.inputFolder:
     files = subprocess.check_output(['xrdfs', 'root://cms-xrdr.sdfarm.kr/', 'ls', options.inputFolder])
@@ -120,35 +135,17 @@ process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOp
 process.load('Configuration.StandardSequences.RawToDigi_Data_cff')
 process.load('MuDPGAnalysis.MuonDPGNtuples.muNtupleProducer_cfi')
 
-
-
 process.muNtupleProducer.isMC = cms.bool(options.isMC)
-process.muNtupleProducer.SaveVFATStatus = cms.bool(options.SaveVFATStatus)
+process.muNtupleProducer.storeOHStatus = cms.bool(options.storeOHStatus)
+process.muNtupleProducer.storeAMCStatus = cms.bool(options.storeAMCStatus)
 
-if options.SaveVFATStatus:
-    processDigi = True
-
-    if options.GE21:
-        processRechit = True
-    else:
-        processRechit = False
-else:
-    processDigi = False
-    processRechit = False
-
-    if options.GE21:
-        processDigi = True
-        processRechit = True
-        
-
-
-if processRechit:
-    process.gemRecHits.ge21Off = cms.bool(False)
+if options.reUnpack and options.GE21:
+    process.gemRecHits.ge21Off = cms.bool(not options.GE21) ## user selection GE21 = True means "store GE21 rechits"
     process.p = cms.Path(
         process.muonGEMDigis *
         process.gemRecHits *
         process.muNtupleProducer)
-elif processDigi and not processRechit:
+elif options.reUnpack:
     process.p = cms.Path(
         process.muonGEMDigis *
         process.muNtupleProducer)

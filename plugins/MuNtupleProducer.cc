@@ -34,7 +34,8 @@
 // #include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleDTSegmentFiller.h"
 #include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMDigiFiller.h"
 #include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMRecHitFiller.h"
-#include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMVFATStatusFiller.h"
+#include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMOHStatusFiller.h"
+#include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMAMCStatusFiller.h"
 #include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMSimHitFiller.h"
 #include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMSegmentFiller.h"
 #include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMMuonFiller.h"
@@ -47,7 +48,8 @@ MuNtupleProducer::MuNtupleProducer(const edm::ParameterSet &config)
   usesResource("TFileService");
   edm::Service<TFileService> fileService;
   bool isMC = static_cast<bool>(config.getParameter<bool>("isMC"));
-  bool SaveVFATStatus = static_cast<bool>(config.getParameter<bool>("SaveVFATStatus"));
+  bool storeOHStatus = static_cast<bool>(config.getParameter<bool>("storeOHStatus"));
+  bool storeAMCStatus = static_cast<bool>(config.getParameter<bool>("storeAMCStatus"));
   m_tree = std::shared_ptr<TTree>(fileService->make<TTree>("MuDPGTree", "Mu DPG Tree"));
 
   m_config = std::make_shared<MuNtupleConfig>(MuNtupleConfig(config, consumesCollector()));
@@ -61,8 +63,10 @@ MuNtupleProducer::MuNtupleProducer(const edm::ParameterSet &config)
   // m_fillers.push_back(std::make_unique<MuNtupleDTSegmentFiller>(consumesCollector(), m_config, m_tree, "ph2DtSeg", MuNtupleDTSegmentFiller::Tag::PH2));
 
   // m_fillers.push_back(std::make_unique<MuNtupleGEMDigiFiller>(consumesCollector(), m_config, m_tree, "gemDigi"));
-  if (SaveVFATStatus)
-    m_fillers.push_back(std::make_unique<MuNtupleGEMVFATStatusFiller>(consumesCollector(), m_config, m_tree, "gemOHStatus"));
+  if (storeOHStatus)
+    m_fillers.push_back(std::make_unique<MuNtupleGEMOHStatusFiller>(consumesCollector(), m_config, m_tree, "gemOHStatus"));
+  if (storeAMCStatus)
+    m_fillers.push_back(std::make_unique<MuNtupleGEMAMCStatusFiller>(consumesCollector(), m_config, m_tree, "gemAMCStatus"));
 
   m_fillers.push_back(std::make_unique<MuNtupleGEMRecHitFiller>(consumesCollector(), m_config, m_tree, "gemRecHit"));
 
