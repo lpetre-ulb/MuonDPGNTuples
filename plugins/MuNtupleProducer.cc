@@ -39,6 +39,7 @@
 #include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMSimHitFiller.h"
 #include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMSegmentFiller.h"
 #include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMMuonFiller.h"
+#include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMStandAloneMuonFiller.h"
 
 #include <iostream>
 
@@ -50,19 +51,17 @@ MuNtupleProducer::MuNtupleProducer(const edm::ParameterSet &config)
   bool isMC = static_cast<bool>(config.getParameter<bool>("isMC"));
   bool storeOHStatus = static_cast<bool>(config.getParameter<bool>("storeOHStatus"));
   bool storeAMCStatus = static_cast<bool>(config.getParameter<bool>("storeAMCStatus"));
+  bool RunOnSTA = static_cast<bool>(config.getParameter<bool>("STA"));
+
   m_tree = std::shared_ptr<TTree>(fileService->make<TTree>("MuDPGTree", "Mu DPG Tree"));
 
   m_config = std::make_shared<MuNtupleConfig>(MuNtupleConfig(config, consumesCollector()));
 
   m_fillers.push_back(std::make_unique<MuNtupleEventFiller>(consumesCollector(), m_config, m_tree, "event"));
 
-  // m_fillers.push_back(std::make_unique<MuNtupleDTDigiFiller>(consumesCollector(), m_config, m_tree, "dtDigi",    MuNtupleDTDigiFiller::Tag::PH1));
-  // m_fillers.push_back(std::make_unique<MuNtupleDTDigiFiller>(consumesCollector(), m_config, m_tree, "ph2DtDigi", MuNtupleDTDigiFiller::Tag::PH2));
 
-  // m_fillers.push_back(std::make_unique<MuNtupleDTSegmentFiller>(consumesCollector(), m_config, m_tree, "dtSeg",    MuNtupleDTSegmentFiller::Tag::PH1));
-  // m_fillers.push_back(std::make_unique<MuNtupleDTSegmentFiller>(consumesCollector(), m_config, m_tree, "ph2DtSeg", MuNtupleDTSegmentFiller::Tag::PH2));
-
-  // m_fillers.push_back(std::make_unique<MuNtupleGEMDigiFiller>(consumesCollector(), m_config, m_tree, "gemDigi"));
+  if (false)
+      m_fillers.push_back(std::make_unique<MuNtupleGEMDigiFiller>(consumesCollector(), m_config, m_tree, "gemDigi"));
   if (storeOHStatus)
     m_fillers.push_back(std::make_unique<MuNtupleGEMOHStatusFiller>(consumesCollector(), m_config, m_tree, "gemOHStatus"));
   if (storeAMCStatus)
@@ -70,9 +69,12 @@ MuNtupleProducer::MuNtupleProducer(const edm::ParameterSet &config)
 
   m_fillers.push_back(std::make_unique<MuNtupleGEMRecHitFiller>(consumesCollector(), m_config, m_tree, "gemRecHit"));
 
-  m_fillers.push_back(std::make_unique<MuNtupleGEMSegmentFiller>(consumesCollector(), m_config, m_tree, "gemSegment"));
+  // m_fillers.push_back(std::make_unique<MuNtupleGEMSegmentFiller>(consumesCollector(), m_config, m_tree, "gemSegment"));
 
-  m_fillers.push_back(std::make_unique<MuNtupleGEMMuonFiller>(consumesCollector(), m_config, m_tree, "mu"));
+  if (RunOnSTA)
+    m_fillers.push_back(std::make_unique<MuNtupleGEMStandAloneMuonFiller>(consumesCollector(), m_config, m_tree, "mu"));
+  else
+    m_fillers.push_back(std::make_unique<MuNtupleGEMMuonFiller>(consumesCollector(), m_config, m_tree, "mu"));
 
   if (isMC)
     m_fillers.push_back(std::make_unique<MuNtupleGEMSimHitFiller>(consumesCollector(), m_config, m_tree, "gemSimHit"));

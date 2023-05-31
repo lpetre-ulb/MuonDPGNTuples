@@ -2,7 +2,7 @@
 #include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMMuonFiller.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/LuminosityBlock.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+// #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "DataFormats/Common/interface/Ref.h"
 #include "Geometry/GEMGeometry/interface/GEMGeometry.h"
@@ -266,7 +266,7 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
   auto muons = conditionalGet<reco::MuonCollection>(ev, m_muToken, "MuonCollection");
   auto gem_segments = conditionalGet<GEMSegmentCollection>(ev,m_gemSegmentToken, "GEMSegmentCollection");
   auto csc_segments = conditionalGet<CSCSegmentCollection>(ev,m_cscSegmentToken, "CSCSegmentCollection" );
-  auto vtxs = conditionalGet<std::vector<reco::Vertex>>(ev, m_primaryVerticesToken, "std::vector<reco::Vertex>");
+  //auto vtxs = conditionalGet<std::vector<reco::Vertex>>(ev, m_primaryVerticesToken, "std::vector<reco::Vertex>");
 
   bool isCSC = false;
   bool isME11 = false;

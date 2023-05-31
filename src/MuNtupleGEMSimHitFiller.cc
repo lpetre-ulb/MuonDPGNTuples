@@ -1,7 +1,7 @@
 #include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMSimHitFiller.h"
 
 #include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+// #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 
 #include "DataFormats/MuonReco/interface/Muon.h"

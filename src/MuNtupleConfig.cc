@@ -61,6 +61,8 @@ MuNtupleConfig::MuNtupleConfig(const edm::ParameterSet & config,
 
   m_inputTags["muonTag"] = config.getUntrackedParameter<edm::InputTag>("muonTag",none);
   
+  m_inputTags["standalonemuonTag"] = config.getUntrackedParameter<edm::InputTag>("standalonemuonTag",none);
+  
   m_inputTags["tcdsTag"] = config.getUntrackedParameter<edm::InputTag>("tcdsTag",none);
 
   m_inputTags["primaryVerticesTag"] = config.getUntrackedParameter<edm::InputTag>("primaryVerticesTag",none);

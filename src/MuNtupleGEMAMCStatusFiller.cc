@@ -1,7 +1,7 @@
 #include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleGEMAMCStatusFiller.h"
 
 #include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/EDAnalyzer.h"
+//#include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 
 MuNtupleGEMAMCStatusFiller::MuNtupleGEMAMCStatusFiller(edm::ConsumesCollector &&collector,
@@ -9,7 +9,7 @@ MuNtupleGEMAMCStatusFiller::MuNtupleGEMAMCStatusFiller(edm::ConsumesCollector &&
                                                          std::shared_ptr<TTree> tree, const std::string &label) : MuNtupleBaseFiller(config, tree, label)
 {
     // I couldn't manage to get the GEM OH Status collections with the usual conditionalGet. So I have copied DQM https://github.com/cms-sw/cmssw/blob/38405a5b319be8ec094c981d6b45320aa577676a/DQM/GEM/plugins/GEMDAQStatusSource.cc#L9
-    gemAMCStatus_tag = collector.consumes<GEMAMCStatusCollection>(edm::InputTag("muonGEMDigis", "AMCStatus"));
+    gemAMCStatus_tag = collector.consumes<GEMAMCStatusCollection>(edm::InputTag("hltMuonGEMDigis", "AMCStatus"));
 }
 
 MuNtupleGEMAMCStatusFiller::~MuNtupleGEMAMCStatusFiller(){
@@ -59,7 +59,7 @@ void MuNtupleGEMAMCStatusFiller::fill(const edm::Event &ev)
 
     else
     {
-        std::cout << "OH_Statuscollection is invalid" << std::endl;
+        std::cout << "OH_Statuscollection is invalid GEMAMCStatusFiller" << std::endl;
     }
 
     return;
