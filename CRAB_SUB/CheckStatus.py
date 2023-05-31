@@ -4,10 +4,9 @@ from CRABClient.UserUtilities import setConsoleLogLevel
 from CRABClient.ClientUtilities import LOGLEVEL_MUTE
 setConsoleLogLevel(LOGLEVEL_MUTE)
 
-#folders = ["crab_359998_Muon","crab_360018_Muon","crab_360019_Muon","crab_360075_Muon","crab_360088_Muon","crab_360090_Muon","crab_360116_Muon","crab_360125_Muon","crab_360126_Muon","crab_360127_Muon","crab_360128_Muon","crab_360130_Muon","crab_360131_Muon","crab_360141_Muon","crab_360295_Muon","crab_360296_Muon"]
-folders = glob.glob("crab_3*")
+folders = glob.glob("crab_*")
 
-print(f'{"folder":>20}{"finished":>10}{"transferring":>15}{"running":>10}{"idle":>10}{"unsubmitted":>15}{"failed":>10}{"%finished":>15}{"total":>10}{"submitted":>14}')
+print(f'{"folder":>50}{"finished":>10}{"transferring":>15}{"running":>10}{"idle":>10}{"unsubmitted":>15}{"failed":>10}{"%finished":>15}{"total":>10}{"submitted":>14}')
 for f in folders:
     res = crabCommand('status', dir = f)
 
@@ -21,4 +20,4 @@ for f in folders:
     submitted = len(res["jobList"])
     successrate = round(float(finished/submitted)*100,2) if submitted!=0 else 0
     
-    print(f'{f:>20}{finished:>10}{transferring:>15}{running:>10}{idle:>10}{unsubmitted:>15}{failed:>10}{successrate:>15}{tot:>10}{submitted:>14}')
+    print(f'{f:>50}{finished:>10}{transferring:>15}{running:>10}{idle:>10}{unsubmitted:>15}{failed:>10}{successrate:>15}{tot:>10}{submitted:>14}')
