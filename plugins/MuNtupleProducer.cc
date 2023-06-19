@@ -52,6 +52,7 @@ MuNtupleProducer::MuNtupleProducer(const edm::ParameterSet &config)
   bool storeOHStatus = static_cast<bool>(config.getParameter<bool>("storeOHStatus"));
   bool storeAMCStatus = static_cast<bool>(config.getParameter<bool>("storeAMCStatus"));
   bool RunOnSTA = static_cast<bool>(config.getParameter<bool>("STA"));
+  float displacement = static_cast<double>(config.getParameter<double>("displacement"));
 
   m_tree = std::shared_ptr<TTree>(fileService->make<TTree>("MuDPGTree", "Mu DPG Tree"));
 
@@ -72,7 +73,7 @@ MuNtupleProducer::MuNtupleProducer(const edm::ParameterSet &config)
   // m_fillers.push_back(std::make_unique<MuNtupleGEMSegmentFiller>(consumesCollector(), m_config, m_tree, "gemSegment"));
 
   if (RunOnSTA)
-    m_fillers.push_back(std::make_unique<MuNtupleGEMStandAloneMuonFiller>(consumesCollector(), m_config, m_tree, "mu"));
+    m_fillers.push_back(std::make_unique<MuNtupleGEMStandAloneMuonFiller>(consumesCollector(), m_config, m_tree, "mu",displacement));
   else
     m_fillers.push_back(std::make_unique<MuNtupleGEMMuonFiller>(consumesCollector(), m_config, m_tree, "mu"));
 
