@@ -22,6 +22,12 @@ options.register('nEvents',
                  VarParsing.VarParsing.varType.int,
                  "Maximum number of processed events")
 
+options.register('displacement',
+                 0, ## propagate the track at GEM RO board + displacement
+                 VarParsing.VarParsing.multiplicity.singleton,
+                 VarParsing.VarParsing.varType.float,
+                 "Maximum number of processed events")
+
 options.register('STA',
                  False, #default value
                  VarParsing.VarParsing.multiplicity.singleton,
@@ -164,6 +170,7 @@ process.muNtupleProducer.isMC = cms.bool(options.isMC)
 process.muNtupleProducer.storeOHStatus = cms.bool(options.storeOHStatus)
 process.muNtupleProducer.storeAMCStatus = cms.bool(options.storeAMCStatus)
 process.muNtupleProducer.STA = cms.bool(options.STA)
+process.muNtupleProducer.displacement = cms.double(options.displacement)
 
 if options.reUnpack and options.GE21:
     process.gemRecHits.ge21Off = cms.bool(not options.GE21) ## user selection GE21 = True means "store GE21 rechits"
