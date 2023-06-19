@@ -41,13 +41,15 @@
 
 MuNtupleGEMStandAloneMuonFiller::MuNtupleGEMStandAloneMuonFiller(edm::ConsumesCollector && collector,
 					     const std::shared_ptr<MuNtupleConfig> config, 
-					     std::shared_ptr<TTree> tree, const std::string & label) : 
+					     std::shared_ptr<TTree> tree, 
+               const std::string & label,
+               float displacement) : 
 MuNtupleBaseFiller(config, tree, label), m_nullVecF()
 {
 
   edm::InputTag & muonTag = m_config->m_inputTags["standalonemuonTag"];
   if (muonTag.label() != "none") m_muToken = collector.consumes<std::vector<reco::Track>>(muonTag);
-
+  m_displacement = displacement;
   
 }
 
@@ -74,6 +76,7 @@ void MuNtupleGEMStandAloneMuonFiller::initialize()
   m_tree->Branch((m_label + "_nSTAHits").c_str(), &m_STA_nHits);
   m_tree->Branch((m_label + "_isRPC").c_str(), &m_isRPC);
   m_tree->Branch((m_label + "_isDT").c_str(), &m_isDT);
+  m_tree->Branch((m_label + "_nME11hits").c_str(), &m_nME11hits);
   m_tree->Branch((m_label + "_nME1hits").c_str(), &m_nME1hits);
   m_tree->Branch((m_label + "_nME2hits").c_str(), &m_nME2hits);
   m_tree->Branch((m_label + "_nME3hits").c_str(), &m_nME3hits);
@@ -93,6 +96,7 @@ void MuNtupleGEMStandAloneMuonFiller::initialize()
   m_tree->Branch((m_label + "_propagated_isRPC").c_str(), &m_propagated_isRPC);
   m_tree->Branch((m_label + "_propagated_isME11").c_str(), &m_propagated_isME11);
   m_tree->Branch((m_label + "_propagated_isME21").c_str(), &m_propagated_isME21);
+  m_tree->Branch((m_label + "_propagated_nME11hits").c_str(), &m_propagated_nME11hits);
   m_tree->Branch((m_label + "_propagated_nME1hits").c_str(), &m_propagated_nME1hits);
   m_tree->Branch((m_label + "_propagated_nME2hits").c_str(), &m_propagated_nME2hits);
   m_tree->Branch((m_label + "_propagated_nME3hits").c_str(), &m_propagated_nME3hits);
@@ -160,6 +164,7 @@ void MuNtupleGEMStandAloneMuonFiller::clear()
   m_isME11.clear();
   m_isME21.clear();
   m_STA_nHits.clear();
+  m_nME11hits.clear();
   m_nME1hits.clear();
   m_nME2hits.clear();
   m_nME3hits.clear();
@@ -179,6 +184,7 @@ void MuNtupleGEMStandAloneMuonFiller::clear()
   m_propagated_isRPC.clear();
   m_propagated_isME11.clear();
   m_propagated_isME21.clear();
+  m_propagated_nME11hits.clear();
   m_propagated_nME1hits.clear();
   m_propagated_nME2hits.clear();
   m_propagated_nME3hits.clear();
@@ -272,6 +278,7 @@ void MuNtupleGEMStandAloneMuonFiller::fill(const edm::Event & ev)
       isGEM = false;
       isME11 = false;
       isME21 = false;
+      nME11_hits = 0;
       nME1_hits = 0;
       nME2_hits = 0;
       nME3_hits = 0;
@@ -294,7 +301,10 @@ void MuNtupleGEMStandAloneMuonFiller::fill(const edm::Event & ev)
               isCSC = true;
               int CSC_station = p.getMuonStation(hit);                
               int CSC_ring = reco::HitPattern::getCSCRing(hit);
-              if(CSC_station == 1 && ((CSC_ring == 1) || (CSC_ring == 4)) ) isME11 = true;
+              if(CSC_station == 1 && ((CSC_ring == 1) || (CSC_ring == 4)) ) {
+                isME11 = true;
+                nME11_hits++;
+              }
               if(CSC_station == 2 && CSC_ring == 1) isME21 = true;
               if(CSC_station == 1) nME1_hits++;
               if(CSC_station == 2) nME2_hits++;
@@ -326,6 +336,7 @@ void MuNtupleGEMStandAloneMuonFiller::fill(const edm::Event & ev)
       m_isME11.push_back(isME11);
       m_isME21.push_back(isME21);
       m_STA_nHits.push_back(nTrackHits);
+      m_nME11hits.push_back(nME11_hits);
       m_nME1hits.push_back(nME1_hits);
       m_nME2hits.push_back(nME2_hits);
       m_nME3hits.push_back(nME3_hits);
@@ -347,7 +358,31 @@ void MuNtupleGEMStandAloneMuonFiller::fill(const edm::Event & ev)
               for (const GEMEtaPartition* eta_partition : chamber->etaPartitions()){
               
                 const BoundPlane& bound_plane = eta_partition->surface();
-                const auto& dest_state = propagator_any->propagate(start_state,bound_plane);
+                // PROPAGATION ON ETAP SURFACE
+                // The Z of the dest_state is fixed one the boundplane. x,y are actually evaluated by the propagator at that Z
+                // const auto& dest_state = propagator_any->propagate(start_state,bound_plane);
+                //END PROPAGATION ON ETAP SURFACE
+
+                // PROPAGATION IN THE DRIFT GAP
+                BoundPlane& etaPSur_translated_to_drift = const_cast<BoundPlane&>(bound_plane);
+
+                int ch = eta_partition->id().chamber();
+                int re = eta_partition->id().region();
+                // double displacement = -100;
+                    
+                // if (ch % 2 == 0)
+                //     {
+                //         displacement = -0.55*re;
+                //     }
+                // if (ch % 2 == 1)
+                //     {
+                //         displacement = 0.55*re;
+                //     }
+                
+                etaPSur_translated_to_drift.move(GlobalVector(0.,0.,m_displacement));
+                const auto& dest_state = propagator_any->propagate(start_state,etaPSur_translated_to_drift);
+                etaPSur_translated_to_drift.move(GlobalVector(0.,0.,-m_displacement));
+                // END PROPAGATION IN THE DRIFT GAP
                 
 
                 if (not dest_state.isValid()){
@@ -387,6 +422,7 @@ void MuNtupleGEMStandAloneMuonFiller::fill(const edm::Event & ev)
                   m_propagated_isRPC.push_back(isRPC);
                   m_propagated_isME11.push_back(isME11);
                   m_propagated_isME21.push_back(isME21);
+                  m_propagated_nME11hits.push_back(nME11_hits);
                   m_propagated_nME1hits.push_back(nME1_hits);
                   m_propagated_nME2hits.push_back(nME2_hits);
                   m_propagated_nME3hits.push_back(nME3_hits);

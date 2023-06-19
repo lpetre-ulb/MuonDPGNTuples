@@ -32,7 +32,9 @@ class MuNtupleGEMStandAloneMuonFiller : public MuNtupleBaseFiller
   /// Constructor
   MuNtupleGEMStandAloneMuonFiller(edm::ConsumesCollector && collector,
 		     const std::shared_ptr<MuNtupleConfig> config, 
-		     std::shared_ptr<TTree> tree, const std::string & label);
+		     std::shared_ptr<TTree> tree, 
+         const std::string & label,
+         float displacement);
   
   ///Destructor
   virtual ~MuNtupleGEMStandAloneMuonFiller();
@@ -67,6 +69,7 @@ class MuNtupleGEMStandAloneMuonFiller : public MuNtupleBaseFiller
   std::vector<bool> m_isME11;
   std::vector<bool> m_isME21;
   std::vector<int> m_STA_nHits;
+  std::vector<int> m_nME11hits;
   std::vector<int> m_nME1hits;
   std::vector<int> m_nME2hits;
   std::vector<int> m_nME3hits;
@@ -79,6 +82,7 @@ class MuNtupleGEMStandAloneMuonFiller : public MuNtupleBaseFiller
   std::vector<bool> m_propagated_isME11;
   std::vector<bool> m_propagated_isME21;
   std::vector<int> m_propagated_STA_nHits;
+  std::vector<int> m_propagated_nME11hits;
   std::vector<int> m_propagated_nME1hits;
   std::vector<int> m_propagated_nME2hits;
   std::vector<int> m_propagated_nME3hits;
@@ -132,11 +136,14 @@ class MuNtupleGEMStandAloneMuonFiller : public MuNtupleBaseFiller
   std::vector<float> m_propagated_Outermost_y;
   std::vector<float> m_propagated_Outermost_z;
 
+  float m_displacement;
+
   int nTrackHits = 0;
   int track_region = 0;
   
   unsigned int m_nMuons; 
   unsigned int nME1_hits = 0;
+  unsigned int nME11_hits = 0;
   unsigned int nME2_hits = 0;
   unsigned int nME3_hits = 0;
   unsigned int nME4_hits = 0;
