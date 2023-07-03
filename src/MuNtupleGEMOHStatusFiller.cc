@@ -9,7 +9,9 @@ MuNtupleGEMOHStatusFiller::MuNtupleGEMOHStatusFiller(edm::ConsumesCollector &&co
                                                          std::shared_ptr<TTree> tree, const std::string &label) : MuNtupleBaseFiller(config, tree, label)
 {
     // I couldn't manage to get the GEM OH Status collections with the usual conditionalGet. So I have copied DQM https://github.com/cms-sw/cmssw/blob/38405a5b319be8ec094c981d6b45320aa577676a/DQM/GEM/plugins/GEMDAQStatusSource.cc#L9
-    m_gemOHStatusToken = collector.consumes<GEMOHStatusCollection>(edm::InputTag("hltMuonGEMDigis", "OHStatus"));
+    edm::InputTag &iTag = m_config->m_inputTags["gemOHStatusTag"];
+    m_gemOHStatusToken = collector.consumes<GEMOHStatusCollection>(iTag);
+    // m_gemOHStatusToken = collector.consumes<GEMOHStatusCollection>(edm::InputTag("hltMuonGEMDigis", "OHStatus"));
 }
 
 MuNtupleGEMOHStatusFiller::~MuNtupleGEMOHStatusFiller(){
