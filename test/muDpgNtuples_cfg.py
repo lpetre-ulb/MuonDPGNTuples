@@ -63,6 +63,11 @@ options.register('GE21',
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.bool,
                  "enables storing of GE21 rechits, disabled by default in CMSSW: i.e when running on a RAW dataset it's possible to reprocess digi and build GE21 rechits and save them in the ntuples")
+options.register('CSClct',
+                 True, #default value
+                 VarParsing.VarParsing.multiplicity.singleton,
+                 VarParsing.VarParsing.varType.bool,
+                 "enables unpacking of CSC digi to extract CSC diti LCT")
 
 options.register('inputFolder',
                  #/eos/cms/store/
@@ -111,7 +116,7 @@ if "eos/cms" in options.inputFolder:
     #files = subprocess.check_output(['xrdfs', 'root://eoscms.cern.ch/', 'ls', options.inputFolder]) ## Did work with CMSSW 11XX, not anymore w CMSSW 12
     files = os.listdir(options.inputFolder)
     #process.source.fileNames = ["file:"+options.inputFolder + f for f in files if "07a64f0e-25eb-40b6-b2a6-e8971a4e0ce8.root" in f]
-    process.source.fileNames = ["file:/eos/cms/tier0/store/data/Run2023C/RPCMonitor/RAW/v2/000/367/840/00000/664f04b4-6b96-4950-983a-d8846a0f39a7.root"]
+    process.source.fileNames = ["root://cms-xrd-global.cern.ch//store/data/Run2023C/Muon0/RAW-RECO/ZMu-PromptReco-v4/000/368/567/00000/23a959f6-169b-4ec6-aaec-23c1f9683cb2.root"]
 
 elif "/xrd/" in options.inputFolder:
     files = subprocess.check_output(['xrdfs', 'root://cms-xrdr.sdfarm.kr/', 'ls', options.inputFolder])
@@ -182,6 +187,12 @@ elif options.reUnpack:
     process.p = cms.Path(
         process.muonGEMDigis *
         process.muNtupleProducer)
+elif options.CSClct:
+    # TO STORE OUTPUT FILE
+    # process.gino = cms.OutputModule("PoolOutputModule", outputCommands = cms.untracked.vstring("keep *_*_*_*"), fileName=cms.untracked.string("out.root"))
+    process.p = cms.Path(process.muonCSCDigis * process.muNtupleProducer)
+    # TO STORE OUTPUT FILE
+    # process.this_is_the_end = cms.EndPath(process.gino)
 elif options.STA:
     #process.muNtupleProducer.muonTag = cms.untracked.InputTag("TestSTA")
 
