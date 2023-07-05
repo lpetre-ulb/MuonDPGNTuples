@@ -368,7 +368,21 @@ void MuNtupleGEMStandAloneMuonFiller::fill(const edm::Event & ev)
 
                 int ch = eta_partition->id().chamber();
                 int re = eta_partition->id().region();
-                    
+                if (re == -1){
+                  etaPSur_translated_to_drift.move(GlobalVector(0.,0.,m_displacement));
+                  const auto& dest_state = propagator_any->propagate(start_state,etaPSur_translated_to_drift);
+                  etaPSur_translated_to_drift.move(GlobalVector(0.,0.,-m_displacement));
+                }
+                else if (re == 1)  {
+                  etaPSur_translated_to_drift.move(GlobalVector(0.,0.,-m_displacement));
+                  const auto& dest_state = propagator_any->propagate(start_state,etaPSur_translated_to_drift);
+                  etaPSur_translated_to_drift.move(GlobalVector(0.,0.,m_displacement));
+                }
+                else{
+                  std::cout<<"Error region is neither +1 or -1"<<std::endl;
+                  const auto& dest_state = propagator_any->propagate(start_state,etaPSur_translated_to_drift);
+                }
+                
                 // if (ch % 2 == 0)
                 //     {
                 //         displacement = -0.55*re;
@@ -376,18 +390,11 @@ void MuNtupleGEMStandAloneMuonFiller::fill(const edm::Event & ev)
                 // if (ch % 2 == 1)
                 //     {
                 //         displacement = 0.55*re;
-                //     }
-                if (re == -1)
-                  etaPSur_translated_to_drift.move(GlobalVector(0.,0.,m_displacement));
-                  const auto& dest_state = propagator_any->propagate(start_state,etaPSur_translated_to_drift);
-                  etaPSur_translated_to_drift.move(GlobalVector(0.,0.,-m_displacement));
-                else if (re == 1)  
-                  etaPSur_translated_to_drift.move(GlobalVector(0.,0.,-m_displacement));
-                  const auto& dest_state = propagator_any->propagate(start_state,etaPSur_translated_to_drift);
-                  etaPSur_translated_to_drift.move(GlobalVector(0.,0.,m_displacement));
-                else
-                  std::cout<<"Error region is neither +1 or -1"<<std::endl;
+                //
 
+
+
+                
                 // END PROPAGATION IN THE DRIFT GAP
                 
 

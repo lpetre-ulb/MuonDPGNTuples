@@ -41,7 +41,9 @@
 
 MuNtupleGEMMuonFiller::MuNtupleGEMMuonFiller(edm::ConsumesCollector && collector,
 					     const std::shared_ptr<MuNtupleConfig> config, 
-					     std::shared_ptr<TTree> tree, const std::string & label) : 
+					     std::shared_ptr<TTree> tree,
+                         const std::string & label,
+                         float displacement) : 
 MuNtupleBaseFiller(config, tree, label), m_nullVecF()
 {
 
@@ -50,21 +52,7 @@ MuNtupleBaseFiller(config, tree, label), m_nullVecF()
 
   edm::InputTag & primaryVerticesTag = m_config->m_inputTags["primaryVerticesTag"];
   if (primaryVerticesTag.label() != "none") m_primaryVerticesToken = collector.consumes<std::vector<reco::Vertex>>(primaryVerticesTag);
-
-  edm::InputTag & gemSegmentTag = m_config->m_inputTags["gemSegmentTag"];
-  if (gemSegmentTag.label() != "none") m_gemSegmentToken = collector.consumes<GEMSegmentCollection>(gemSegmentTag);
-  
-  edm::InputTag & cscSegmentTag = m_config->m_inputTags["cscSegmentTag"];
-  if(cscSegmentTag.label() != "none") m_cscSegmentToken = collector.consumes<CSCSegmentCollection>(cscSegmentTag);
-
-  edm::InputTag & trigResultsTag = m_config->m_inputTags["trigResultsTag"];
-  if (trigResultsTag.label() != "none") m_trigResultsToken = collector.consumes<edm::TriggerResults>(trigResultsTag);
-
-  edm::InputTag & trigEventTag = m_config->m_inputTags["trigEventTag"];
-  if (trigEventTag.label() != "none") m_trigEventToken = collector.consumes<trigger::TriggerEvent>(trigEventTag);
-
-  edm::InputTag & gemRecHitTag = m_config->m_inputTags["gemRecHitTag"];
-  if (gemRecHitTag.label() != "none") m_gemRecHitToken = collector.consumes<GEMRecHitCollection>(gemRecHitTag);
+  m_displacement = displacement;
   
 }
 
@@ -271,9 +259,6 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
   bool isCSC = false;
   bool isME11 = false;
   bool isME21 = false;
-  
-  edm::Handle<GEMRecHitCollection> rechit_collection;
-  ev.getByToken(m_gemRecHitToken, rechit_collection);
 
  
   edm::ESHandle<Propagator>&& propagator_any = m_config->m_muonSP->propagator("SteppingHelixPropagatorAny");
@@ -487,28 +472,27 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
 
                                                           // PROPAGATION ON ETAP SURFACE
                                                           // The Z of the dest_state is fixed one the boundplane. x,y are actually evaluated by the propagator at that Z
-                                                          const auto& dest_state = propagator_any->propagate(start_state,bound_plane);
+                                                          //const auto& dest_state = propagator_any->propagate(start_state,bound_plane);
                                                           //END PROPAGATION ON ETAP SURFACE
-
                                                           // // PROPAGATION IN THE DRIFT GAP
-                                                          // BoundPlane& etaPSur_translated_to_drift = const_cast<BoundPlane&>(bound_plane);
-
-                                                          // int ch = eta_partition->id().chamber();
-                                                          // int re = eta_partition->id().region();
-                                                          // double displacement = 0;
-                                                              
-                                                          // if (ch % 2 == 0)
-                                                          //     {
-                                                          //         displacement = -0.55*re;
-                                                          //     }
-                                                          // if (ch % 2 == 1)
-                                                          //     {
-                                                          //         displacement = 0.55*re;
-                                                          //     }
+                                                          BoundPlane& etaPSur_translated_to_drift = const_cast<BoundPlane&>(bound_plane);
+                                                          int ch = eta_partition->id().chamber();
+                                                          int re = eta_partition->id().region();
                                                           
-                                                          // etaPSur_translated_to_drift.move(GlobalVector(0.,0.,displacement));
-                                                          // const auto& dest_state = propagator_any->propagate(start_state,etaPSur_translated_to_drift);
-                                                          // etaPSur_translated_to_drift.move(GlobalVector(0.,0.,-displacement));
+                                                          if (re == -1){
+                                                              etaPSur_translated_to_drift.move(GlobalVector(0.,0.,m_displacement));
+                                                              const auto& dest_state = propagator_any->propagate(start_state,etaPSur_translated_to_drift);
+                                                              etaPSur_translated_to_drift.move(GlobalVector(0.,0.,-m_displacement));
+                                                          }
+                                                          else if (re == 1)  {
+                                                              etaPSur_translated_to_drift.move(GlobalVector(0.,0.,-m_displacement));
+                                                              const auto& dest_state = propagator_any->propagate(start_state,etaPSur_translated_to_drift);
+                                                              etaPSur_translated_to_drift.move(GlobalVector(0.,0.,m_displacement));
+                                                          }
+                                                          else{
+                                                              std::cout<<"Error region is neither +1 or -1"<<std::endl;
+                                                              const auto& dest_state = propagator_any->propagate(start_state,etaPSur_translated_to_drift);
+                                                          }
                                                           // // END PROPAGATION IN THE DRIFT GAP
 
 

@@ -33,8 +33,8 @@ class MuNtupleGEMStandAloneMuonFiller : public MuNtupleBaseFiller
   MuNtupleGEMStandAloneMuonFiller(edm::ConsumesCollector && collector,
 		     const std::shared_ptr<MuNtupleConfig> config, 
 		     std::shared_ptr<TTree> tree, 
-         const std::string & label,
-         float displacement);
+             const std::string & label,
+             float displacement);
   
   ///Destructor
   virtual ~MuNtupleGEMStandAloneMuonFiller();
@@ -137,6 +137,7 @@ class MuNtupleGEMStandAloneMuonFiller : public MuNtupleBaseFiller
   std::vector<float> m_propagated_Outermost_z;
 
   float m_displacement;
+  const TrajectoryStateOnSurface dest_state;
 
   int nTrackHits = 0;
   int track_region = 0;

@@ -75,7 +75,7 @@ MuNtupleProducer::MuNtupleProducer(const edm::ParameterSet &config)
   if (RunOnSTA)
     m_fillers.push_back(std::make_unique<MuNtupleGEMStandAloneMuonFiller>(consumesCollector(), m_config, m_tree, "mu",displacement));
   else
-    m_fillers.push_back(std::make_unique<MuNtupleGEMMuonFiller>(consumesCollector(), m_config, m_tree, "mu"));
+      m_fillers.push_back(std::make_unique<MuNtupleGEMMuonFiller>(consumesCollector(), m_config, m_tree, "mu",displacement));
 
   if (isMC)
     m_fillers.push_back(std::make_unique<MuNtupleGEMSimHitFiller>(consumesCollector(), m_config, m_tree, "gemSimHit"));

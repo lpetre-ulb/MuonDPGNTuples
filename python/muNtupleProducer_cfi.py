@@ -11,7 +11,7 @@ muNtupleProducer = cms.EDAnalyzer("MuNtupleProducer",
 
                                   ph1DTtTrigMode = cms.untracked.string('DTTTrigSyncFromDB'),
                                   isMC = cms.bool(False),
-                                  gemDigiTag = cms.untracked.InputTag("muonGEMDigis"),
+                                  gemDigiTag = cms.untracked.InputTag("hltMuonGEMDigis"),
                                 #   gemOHStatusTag = cms.untracked.InputTag("muonGEMDigis", "OHStatus"),
                                   #gemDigiTag = cms.untracked.InputTag("simMuonGEMDigis"),
                                   gemRecHitTag = cms.untracked.InputTag("hltGemRecHits"),

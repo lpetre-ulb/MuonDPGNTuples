@@ -32,7 +32,9 @@ class MuNtupleGEMMuonFiller : public MuNtupleBaseFiller
   /// Constructor
   MuNtupleGEMMuonFiller(edm::ConsumesCollector && collector,
 		     const std::shared_ptr<MuNtupleConfig> config, 
-		     std::shared_ptr<TTree> tree, const std::string & label);
+		     std::shared_ptr<TTree> tree,
+             const std::string & label,
+             float displacement);
   
   ///Destructor
   virtual ~MuNtupleGEMMuonFiller();
@@ -94,7 +96,8 @@ class MuNtupleGEMMuonFiller : public MuNtupleBaseFiller
   std::vector<bool> m_isinsideout;
   
   float m_path_length;
-
+  float m_displacement;
+  const TrajectoryStateOnSurface dest_state;
   std::vector<int> m_propagated_region;
   std::vector<int> m_propagated_station;
   std::vector<int> m_propagated_layer;

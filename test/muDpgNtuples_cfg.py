@@ -7,6 +7,22 @@ import os
 import subprocess
 import sys
 
+
+"""
+OPTIONS SUMMARY
+* globalTag       --> GT of the run 
+* nEvents         --> Number of events to be processed
+* displacement    --> Track propagation displacement: propagate the muon tracks not on GE11 ROB but on the virtual surface of ROB moved closed to the IP by <displacement>
+* STA             --> Process CSC hltDigis and build standalong tracks. Only works for RPC Monitor
+* isMC            --> MC dataset
+* reUnpack        --> gem digis not stored in prompt reco. In case you need to access the GEM digis on a RAW-RECO dataset (e.g. reading OH or AMC status) the reunpakc has to be triggered. The RPCMonitor already contains the digis so it's not needed there.
+* storeOHStatus   --> Enables the filler for the OHStatus
+* storeAMCStatus  --> Enables the filler for the AMCStatus
+* GE21            --> Forces the runpacking of gemDigi and then the construction of GE21 rechits which is turned off by default
+
+"""
+
+
 options = VarParsing.VarParsing()
 
 options.register('globalTag',
@@ -111,7 +127,7 @@ if "eos/cms" in options.inputFolder:
     #files = subprocess.check_output(['xrdfs', 'root://eoscms.cern.ch/', 'ls', options.inputFolder]) ## Did work with CMSSW 11XX, not anymore w CMSSW 12
     files = os.listdir(options.inputFolder)
     #process.source.fileNames = ["file:"+options.inputFolder + f for f in files if "07a64f0e-25eb-40b6-b2a6-e8971a4e0ce8.root" in f]
-    process.source.fileNames = ["file:/eos/cms/tier0/store/data/Run2023C/RPCMonitor/RAW/v2/000/367/840/00000/664f04b4-6b96-4950-983a-d8846a0f39a7.root"]
+    process.source.fileNames = ["root://cms-xrd-global.cern.ch//store/data/Run2023C/Muon0/RAW-RECO/ZMu-PromptReco-v4/000/368/567/00000/23a959f6-169b-4ec6-aaec-23c1f9683cb2.root"]
 
 elif "/xrd/" in options.inputFolder:
     files = subprocess.check_output(['xrdfs', 'root://cms-xrdr.sdfarm.kr/', 'ls', options.inputFolder])
