@@ -39,8 +39,8 @@ elif args.Dataset == 'ZeroBias':
     unitsPerJob = 1
     fileSplitting = "FileBased"
 elif args.Dataset == 'ZMu':
-    globalTag = '124X_dataRun3_Prompt_v4'
-    inputDataset = ["/Muon/Run2022G-ZMu-PromptReco-v1/RAW-RECO"]
+    globalTag = '130X_dataRun3_Prompt_v3'
+    inputDataset = ["/Muon0/Run2023C-ZMu-PromptReco-v3/RAW-RECO","/Muon1/Run2023C-ZMu-PromptReco-v3/RAW-RECO"]
     unitsPerJob = 20
     fileSplitting = "FileBased"
 elif args.Dataset == 'MinimumBias':
@@ -62,7 +62,7 @@ config.JobType.pluginName = 'Analysis'
 #config.JobType.psetName = "{}/test/muDpgNtuples_cfg_misalignement.py".format(baseDirectory)
 config.JobType.psetName = "{}/test/muDpgNtuples_cfg.py".format(baseDirectory)
 config.JobType.allowUndistributedCMSSW = True
-config.JobType.pyCfgParams = ['isMC=False','reUnpack=True', 'storeOHStatus=True','GE21=True','nEvents=-1','globalTag='+str(globalTag)]
+config.JobType.pyCfgParams = ['isMC=False', 'storeAMCStatus=True','storeOHStatus=True','nEvents=-1','globalTag='+str(globalTag)]
 #config.JobType.maxMemoryMB = 5000
 
 config.section_("Data")

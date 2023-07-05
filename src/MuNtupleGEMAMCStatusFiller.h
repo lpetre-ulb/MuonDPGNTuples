@@ -34,7 +34,7 @@ class MuNtupleGEMAMCStatusFiller : public MuNtupleBaseFiller
   
 
  private:
-  edm::EDGetToken gemAMCStatus_tag;
+  edm::EDGetToken gemAMCStatus_token;
   edm::ESGetToken<GEMGeometry, MuonGeometryRecord> geomToken_;
 
   std::vector<Int_t> m_AMCStatus_FEDId;
