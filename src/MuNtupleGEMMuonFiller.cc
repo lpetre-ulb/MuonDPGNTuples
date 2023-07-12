@@ -514,7 +514,7 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
 
                                                           if (not dest_state.isValid())
                                                               {
-                                                                  std::cout << "failed to propagate" << std::endl;
+                                                                  //std::cout << "failed to propagate" << std::endl;
                                                                   continue;
                                                               }
 
