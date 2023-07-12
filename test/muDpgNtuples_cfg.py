@@ -132,7 +132,7 @@ if "eos/cms" in options.inputFolder:
     #files = subprocess.check_output(['xrdfs', 'root://eoscms.cern.ch/', 'ls', options.inputFolder]) ## Did work with CMSSW 11XX, not anymore w CMSSW 12
     files = os.listdir(options.inputFolder)
     #process.source.fileNames = ["file:"+options.inputFolder + f for f in files if "07a64f0e-25eb-40b6-b2a6-e8971a4e0ce8.root" in f]
-    process.source.fileNames = ["root://cms-xrd-global.cern.ch//store/data/Run2023C/Muon0/RAW-RECO/ZMu-PromptReco-v4/000/368/567/00000/23a959f6-169b-4ec6-aaec-23c1f9683cb2.root"]
+    process.source.fileNames = ["root://cms-xrd-global.cern.ch//store/data/Run2023D/Muon0/RAW-RECO/ZMu-PromptReco-v1/000/370/293/00000/2244179c-9f4c-4fec-b1d0-97650a4d3091.root"]
 
 elif "/xrd/" in options.inputFolder:
     files = subprocess.check_output(['xrdfs', 'root://cms-xrdr.sdfarm.kr/', 'ls', options.inputFolder])
@@ -191,6 +191,7 @@ process.muNtupleProducer.isMC = cms.bool(options.isMC)
 process.muNtupleProducer.storeOHStatus = cms.bool(options.storeOHStatus)
 process.muNtupleProducer.storeAMCStatus = cms.bool(options.storeAMCStatus)
 process.muNtupleProducer.STA = cms.bool(options.STA)
+process.muNtupleProducer.CSClct = cms.bool(options.CSClct)
 process.muNtupleProducer.displacement = cms.double(options.displacement)
 
 if options.reUnpack and options.GE21:
@@ -205,10 +206,10 @@ elif options.reUnpack:
         process.muNtupleProducer)
 elif options.CSClct:
     # TO STORE OUTPUT FILE
-    # process.gino = cms.OutputModule("PoolOutputModule", outputCommands = cms.untracked.vstring("keep *_*_*_*"), fileName=cms.untracked.string("out.root"))
+    process.gino = cms.OutputModule("PoolOutputModule", outputCommands = cms.untracked.vstring("keep *_*_*_*"), fileName=cms.untracked.string("out.root"))
     process.p = cms.Path(process.muonCSCDigis * process.muNtupleProducer)
     # TO STORE OUTPUT FILE
-    # process.this_is_the_end = cms.EndPath(process.gino)
+    process.this_is_the_end = cms.EndPath(process.gino)
 elif options.STA:
     #process.muNtupleProducer.muonTag = cms.untracked.InputTag("TestSTA")
 
