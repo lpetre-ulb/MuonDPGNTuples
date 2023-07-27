@@ -16,8 +16,6 @@ OPTIONS SUMMARY
 * STA             --> Process CSC hltDigis and build standalong tracks. Only works for RPC Monitor
 * isMC            --> MC dataset
 * reUnpack        --> gem digis not stored in prompt reco. In case you need to access the GEM digis on a RAW-RECO dataset (e.g. reading OH or AMC status) the reunpakc has to be triggered. The RPCMonitor already contains the digis so it's not needed there.
-* storeOHStatus   --> Enables the filler for the OHStatus
-* storeAMCStatus  --> Enables the filler for the AMCStatus
 * GE21            --> Forces the runpacking of gemDigi and then the construction of GE21 rechits which is turned off by default
 
 """
@@ -26,7 +24,7 @@ OPTIONS SUMMARY
 options = VarParsing.VarParsing()
 
 options.register('globalTag',
-                 '130X_dataRun3_Prompt_v3', #'124X_dataRun3_Prompt_v4',
+                 'auto:phase1_2023_realistic', #'124X_dataRun3_Prompt_v4',
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.string,
                  "Global Tag")
@@ -61,18 +59,6 @@ options.register('reUnpack',
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.bool,
                  "enables reprocessing of digis: i.e OHStatus is not stored in RECO datesets, but can be extracted by re-unpacking data from a RAW dataset.")
-
-options.register('storeOHStatus',
-                 True, #default value,
-                 VarParsing.VarParsing.multiplicity.singleton,
-                 VarParsing.VarParsing.varType.bool,
-                 "Save OH status info from unpacker")
-
-options.register('storeAMCStatus',
-                 True, #default value
-                 VarParsing.VarParsing.multiplicity.singleton,
-                 VarParsing.VarParsing.varType.bool,
-                 "Save AMC status info from unpacker")
 
 options.register('GE21',
                  False, #default value
@@ -127,7 +113,7 @@ if "eos/cms" in options.inputFolder:
     #files = subprocess.check_output(['xrdfs', 'root://eoscms.cern.ch/', 'ls', options.inputFolder]) ## Did work with CMSSW 11XX, not anymore w CMSSW 12
     files = os.listdir(options.inputFolder)
     #process.source.fileNames = ["file:"+options.inputFolder + f for f in files if "07a64f0e-25eb-40b6-b2a6-e8971a4e0ce8.root" in f]
-    process.source.fileNames = ["root://cms-xrd-global.cern.ch//store/data/Run2023C/Muon0/RAW-RECO/ZMu-PromptReco-v4/000/368/567/00000/23a959f6-169b-4ec6-aaec-23c1f9683cb2.root"]
+    process.source.fileNames = ["file:/afs/cern.ch/user/c/cschoebe/public/step31.root"]
 
 elif "/xrd/" in options.inputFolder:
     files = subprocess.check_output(['xrdfs', 'root://cms-xrdr.sdfarm.kr/', 'ls', options.inputFolder])
@@ -183,8 +169,6 @@ muonstandalonereco = cms.Sequence(process.offlineBeamSpot + standAloneMuonSeeds 
 
 
 process.muNtupleProducer.isMC = cms.bool(options.isMC)
-process.muNtupleProducer.storeOHStatus = cms.bool(options.storeOHStatus)
-process.muNtupleProducer.storeAMCStatus = cms.bool(options.storeAMCStatus)
 process.muNtupleProducer.STA = cms.bool(options.STA)
 process.muNtupleProducer.displacement = cms.double(options.displacement)
 

@@ -42,8 +42,7 @@
 MuNtupleGEMMuonFiller::MuNtupleGEMMuonFiller(edm::ConsumesCollector && collector,
 					     const std::shared_ptr<MuNtupleConfig> config, 
 					     std::shared_ptr<TTree> tree,
-                         const std::string & label,
-                         float displacement) : 
+                         const std::string & label) : 
 MuNtupleBaseFiller(config, tree, label), m_nullVecF()
 {
 
@@ -52,7 +51,6 @@ MuNtupleBaseFiller(config, tree, label), m_nullVecF()
 
   edm::InputTag & primaryVerticesTag = m_config->m_inputTags["primaryVerticesTag"];
   if (primaryVerticesTag.label() != "none") m_primaryVerticesToken = collector.consumes<std::vector<reco::Vertex>>(primaryVerticesTag);
-  m_displacement = displacement;
   
 }
 
@@ -329,7 +327,6 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
 	  if(!muon.outerTrack().isNull())   //STA muon
 
 	    {
-	      
 
 	      //const reco::Track* track = muon.globalTrack().get();   //GLB muon
           //const reco::Track* track = muon.innerTrack().get();    //tracker muon
@@ -475,24 +472,15 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
                                                           //const auto& dest_state = propagator_any->propagate(start_state,bound_plane);
                                                           //END PROPAGATION ON ETAP SURFACE
                                                           // // PROPAGATION IN THE DRIFT GAP
-                                                          BoundPlane& etaPSur_translated_to_drift = const_cast<BoundPlane&>(bound_plane);
+
+                                                          BoundPlane& etaPSur = const_cast<BoundPlane&>(bound_plane);
                                                           int ch = eta_partition->id().chamber();
                                                           int re = eta_partition->id().region();
-                                                          
-                                                          if (re == -1){
-                                                              etaPSur_translated_to_drift.move(GlobalVector(0.,0.,m_displacement));
-                                                              const auto& dest_state = propagator_any->propagate(start_state,etaPSur_translated_to_drift);
-                                                              etaPSur_translated_to_drift.move(GlobalVector(0.,0.,-m_displacement));
-                                                          }
-                                                          else if (re == 1)  {
-                                                              etaPSur_translated_to_drift.move(GlobalVector(0.,0.,-m_displacement));
-                                                              const auto& dest_state = propagator_any->propagate(start_state,etaPSur_translated_to_drift);
-                                                              etaPSur_translated_to_drift.move(GlobalVector(0.,0.,m_displacement));
-                                                          }
-                                                          else{
-                                                              std::cout<<"Error region is neither +1 or -1"<<std::endl;
-                                                              const auto& dest_state = propagator_any->propagate(start_state,etaPSur_translated_to_drift);
-                                                          }
+                                                          const auto& dest_state = propagator_any->propagate(start_state,etaPSur);
+                                                          const GlobalPoint&& dest_global_pos = dest_state.globalPosition();
+                                                          const LocalPoint&& local_point = eta_partition->toLocal(dest_global_pos);
+                                                          const LocalPoint local_point_2d(local_point.x(), local_point.y(), 0.0f);
+
                                                           // // END PROPAGATION IN THE DRIFT GAP
 
 
@@ -502,14 +490,9 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
                                                                   continue;
                                                               }
 
-
-                                                          const GlobalPoint&& dest_global_pos = dest_state.globalPosition();
-                                                          const LocalPoint&& local_point = eta_partition->toLocal(dest_global_pos);
-                                                          const LocalPoint local_point_2d(local_point.x(), local_point.y(), 0.0f);
-
                                                           if (eta_partition->surface().bounds().inside(local_point_2d)) 
                                                               {
-
+                                                                  std::cout<<"HERE"<<std::endl;
                                                                   const GEMDetId&& gem_id = eta_partition->id();
 
                                                                   //// PROPAGATED HIT ERROR EVALUATION
