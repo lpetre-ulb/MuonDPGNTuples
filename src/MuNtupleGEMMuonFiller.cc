@@ -492,7 +492,6 @@ void MuNtupleGEMMuonFiller::fill(const edm::Event & ev)
 
                                                           if (eta_partition->surface().bounds().inside(local_point_2d)) 
                                                               {
-                                                                  std::cout<<"HERE"<<std::endl;
                                                                   const GEMDetId&& gem_id = eta_partition->id();
 
                                                                   //// PROPAGATED HIT ERROR EVALUATION
