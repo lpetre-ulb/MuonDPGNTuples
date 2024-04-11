@@ -40,11 +40,11 @@
 #include "TFile.h"
 
 MuNtupleGEMStandAloneMuonFiller::MuNtupleGEMStandAloneMuonFiller(edm::ConsumesCollector && collector,
-					     const std::shared_ptr<MuNtupleConfig> config, 
-					     std::shared_ptr<TTree> tree, 
-               const std::string & label,
-               float displacement) : 
-MuNtupleBaseFiller(config, tree, label), m_nullVecF()
+                                                                 const std::shared_ptr<MuNtupleConfig> config, 
+                                                                 std::shared_ptr<TTree> tree, 
+                                                                 const std::string & label,
+                                                                 float displacement) : 
+    MuNtupleBaseFiller(config, tree, label), m_nullVecF()
 {
 
   edm::InputTag & muonTag = m_config->m_inputTags["standalonemuonTag"];
@@ -107,6 +107,7 @@ void MuNtupleGEMStandAloneMuonFiller::initialize()
   m_tree->Branch((m_label + "_propagated_layer").c_str(), &m_propagated_layer);
   m_tree->Branch((m_label + "_propagated_chamber").c_str(), &m_propagated_chamber);
   m_tree->Branch((m_label + "_propagated_etaP").c_str(), &m_propagated_etaP);
+  m_tree->Branch((m_label + "_propagated_strip").c_str(), &m_propagated_strip);
 
   m_tree->Branch((m_label + "_propagatedLoc_x").c_str(), &m_propagatedLoc_x);
   m_tree->Branch((m_label + "_propagatedLoc_y").c_str(), &m_propagatedLoc_y);
@@ -195,6 +196,7 @@ void MuNtupleGEMStandAloneMuonFiller::clear()
   m_propagated_layer.clear();
   m_propagated_chamber.clear();
   m_propagated_etaP.clear();
+  m_propagated_strip.clear();
 
   m_propagatedLoc_x.clear();
   m_propagatedLoc_y.clear();
@@ -351,7 +353,6 @@ void MuNtupleGEMStandAloneMuonFiller::fill(const edm::Event & ev)
       const auto&& start_state = transient_track.innermostMeasurementState();      
       for (const GEMRegion* gem_region : gem->regions()){
         if (gem_region->region() != track_region) continue; // don't propagate a track in the opposite endcap
-        // GEMRegion gem_region = GEMRegion(region);
         for (const GEMStation* station : gem_region->stations()){
           for (const GEMSuperChamber* super_chamber : station->superChambers()){
             for (const GEMChamber* chamber : super_chamber->chambers()){
@@ -363,41 +364,21 @@ void MuNtupleGEMStandAloneMuonFiller::fill(const edm::Event & ev)
                 // const auto& dest_state = propagator_any->propagate(start_state,bound_plane);
                 //END PROPAGATION ON ETAP SURFACE
 
-                // PROPAGATION IN THE DRIFT GAP
                 BoundPlane& etaPSur_translated_to_drift = const_cast<BoundPlane&>(bound_plane);
 
+                
                 int ch = eta_partition->id().chamber();
                 int re = eta_partition->id().region();
-                if (re == -1){
-                  etaPSur_translated_to_drift.move(GlobalVector(0.,0.,m_displacement));
-                  const auto& dest_state = propagator_any->propagate(start_state,etaPSur_translated_to_drift);
-                  etaPSur_translated_to_drift.move(GlobalVector(0.,0.,-m_displacement));
-                }
-                else if (re == 1)  {
-                  etaPSur_translated_to_drift.move(GlobalVector(0.,0.,-m_displacement));
-                  const auto& dest_state = propagator_any->propagate(start_state,etaPSur_translated_to_drift);
-                  etaPSur_translated_to_drift.move(GlobalVector(0.,0.,m_displacement));
-                }
-                else{
-                  std::cout<<"Error region is neither +1 or -1"<<std::endl;
-                  const auto& dest_state = propagator_any->propagate(start_state,etaPSur_translated_to_drift);
-                }
-                
-                // if (ch % 2 == 0)
-                //     {
-                //         displacement = -0.55*re;
-                //     }
-                // if (ch % 2 == 1)
-                //     {
-                //         displacement = 0.55*re;
-                //
+
+                // PROPAGATE WITH DISPLACEMENT
+                if (re == -1)
+                    etaPSur_translated_to_drift.move(GlobalVector(0.,0.,m_displacement));
+                if (re == 1)
+                    etaPSur_translated_to_drift.move(GlobalVector(0.,0.,-m_displacement));
 
 
-
-                
-                // END PROPAGATION IN THE DRIFT GAP
-                
-
+                // PROPAGATE
+                const auto& dest_state = propagator_any->propagate(start_state,etaPSur_translated_to_drift);
                 if (not dest_state.isValid()){
                   if (verbose) std::cout << "failed to propagate" << std::endl;
                   continue;
@@ -447,6 +428,7 @@ void MuNtupleGEMStandAloneMuonFiller::fill(const edm::Event & ev)
                   m_propagated_layer.push_back(gem_id.layer());
                   m_propagated_chamber.push_back(gem_id.chamber());
                   m_propagated_etaP.push_back(gem_id.roll());
+                  m_propagated_strip.push_back(eta_partition->strip(dest_local_pos));
 
                   m_propagatedGlb_x.push_back(dest_global_pos.x());
                   m_propagatedGlb_y.push_back(dest_global_pos.y());

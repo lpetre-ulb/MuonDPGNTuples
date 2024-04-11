@@ -127,7 +127,8 @@ if "eos/cms" in options.inputFolder:
     #files = subprocess.check_output(['xrdfs', 'root://eoscms.cern.ch/', 'ls', options.inputFolder]) ## Did work with CMSSW 11XX, not anymore w CMSSW 12
     files = os.listdir(options.inputFolder)
     #process.source.fileNames = ["file:"+options.inputFolder + f for f in files if "07a64f0e-25eb-40b6-b2a6-e8971a4e0ce8.root" in f]
-    process.source.fileNames = ["root://cms-xrd-global.cern.ch//store/data/Run2023C/Muon0/RAW-RECO/ZMu-PromptReco-v4/000/368/567/00000/23a959f6-169b-4ec6-aaec-23c1f9683cb2.root"]
+    #process.source.fileNames = ["root://cms-xrd-global.cern.ch//store/data/Run2023C/Muon0/RAW-RECO/ZMu-PromptReco-v4/000/368/567/00000/23a959f6-169b-4ec6-aaec-23c1f9683cb2.root"]
+    process.source.fileNames = ["file:/eos/cms/store/group/dpg_gem/comm_gem/P5_Commissioning/2023/RPCMonitor/RAW/v2/000/367/758/00000/01e92558-6268-4891-a6bc-22859c27bde2.root"]
 
 elif "/xrd/" in options.inputFolder:
     files = subprocess.check_output(['xrdfs', 'root://cms-xrdr.sdfarm.kr/', 'ls', options.inputFolder])
