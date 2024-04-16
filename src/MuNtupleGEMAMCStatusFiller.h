@@ -3,8 +3,6 @@
 
 
 #include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleBaseFiller.h"
-#include "Geometry/Records/interface/MuonGeometryRecord.h"
-#include "Geometry/GEMGeometry/interface/GEMGeometry.h"
 #include "DataFormats/GEMDigi/interface/GEMAMCStatusCollection.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "DataFormats/GEMDigi/interface/GEMAMC.h"
@@ -34,8 +32,7 @@ class MuNtupleGEMAMCStatusFiller : public MuNtupleBaseFiller
   
 
  private:
-  edm::EDGetToken gemAMCStatus_tag;
-  edm::ESGetToken<GEMGeometry, MuonGeometryRecord> geomToken_;
+  edm::EDGetTokenT<GEMAMCStatusCollection> m_gemAMCStatusToken;
 
   std::vector<Int_t> m_AMCStatus_FEDId;
   std::vector<Int_t> m_AMCStatus_slot;

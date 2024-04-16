@@ -62,6 +62,10 @@ MuNtupleConfig::MuNtupleConfig(const edm::ParameterSet & config,
   m_inputTags["muonTag"] = config.getUntrackedParameter<edm::InputTag>("muonTag",none);
   
   m_inputTags["standalonemuonTag"] = config.getUntrackedParameter<edm::InputTag>("standalonemuonTag",none);
+
+  m_inputTags["gemAMCStatusTag"] = config.getUntrackedParameter<edm::InputTag>("gemAMCStatusTag", none);
+
+  m_inputTags["gemOHStatusTag"] = config.getUntrackedParameter<edm::InputTag>("gemOHStatusTag", none);
   
   m_inputTags["tcdsTag"] = config.getUntrackedParameter<edm::InputTag>("tcdsTag",none);
 
@@ -74,6 +78,8 @@ MuNtupleConfig::MuNtupleConfig(const edm::ParameterSet & config,
   m_inputTags["genParticlesTag"] = config.getUntrackedParameter<edm::InputTag>("genParticlesTag",none);
 
   m_muonSP = std::make_unique<MuonServiceProxy>(config.getParameter<edm::ParameterSet>("ServiceParameters"), std::move(collector));
+
+
 
 }
 

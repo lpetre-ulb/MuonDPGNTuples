@@ -8,8 +8,8 @@ MuNtupleGEMAMCStatusFiller::MuNtupleGEMAMCStatusFiller(edm::ConsumesCollector &&
                                                          const std::shared_ptr<MuNtupleConfig> config,
                                                          std::shared_ptr<TTree> tree, const std::string &label) : MuNtupleBaseFiller(config, tree, label)
 {
-    // I couldn't manage to get the GEM OH Status collections with the usual conditionalGet. So I have copied DQM https://github.com/cms-sw/cmssw/blob/38405a5b319be8ec094c981d6b45320aa577676a/DQM/GEM/plugins/GEMDAQStatusSource.cc#L9
-    gemAMCStatus_tag = collector.consumes<GEMAMCStatusCollection>(edm::InputTag("hltMuonGEMDigis", "AMCStatus"));
+    edm::InputTag & iTag = m_config->m_inputTags["gemAMCStatusTag"];
+    if (iTag.label() != "none") m_gemAMCStatusToken = collector.consumes<GEMAMCStatusCollection>(iTag);
 }
 
 MuNtupleGEMAMCStatusFiller::~MuNtupleGEMAMCStatusFiller(){
@@ -36,8 +36,7 @@ void MuNtupleGEMAMCStatusFiller::fill(const edm::Event &ev)
 {
     clear();
 
-    edm::Handle<GEMAMCStatusCollection> AMC_StatusCollection;
-    ev.getByToken(gemAMCStatus_tag, AMC_StatusCollection);
+    auto AMC_StatusCollection = conditionalGet<GEMAMCStatusCollection>(ev, m_gemAMCStatusToken,"GEMAMCStatus");
 
     if (AMC_StatusCollection.isValid())
     {
@@ -59,7 +58,7 @@ void MuNtupleGEMAMCStatusFiller::fill(const edm::Event &ev)
 
     else
     {
-        std::cout << "OH_Statuscollection is invalid GEMAMCStatusFiller" << std::endl;
+        std::cout << "AMC_StatusCollection is invalid GEMAMCStatusFiller" << std::endl;
     }
 
     return;

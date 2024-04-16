@@ -3,8 +3,6 @@
 
 
 #include "MuDPGAnalysis/MuonDPGNtuples/src/MuNtupleBaseFiller.h"
-#include "Geometry/Records/interface/MuonGeometryRecord.h"
-#include "Geometry/GEMGeometry/interface/GEMGeometry.h"
 #include "DataFormats/GEMDigi/interface/GEMOHStatusCollection.h"
 #include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "DataFormats/GEMDigi/interface/GEMAMC.h"
@@ -37,8 +35,7 @@ class MuNtupleGEMOHStatusFiller : public MuNtupleBaseFiller
   
   
   /// The OHStatus token
-  edm::EDGetToken m_gemOHStatusToken;
-  edm::ESGetToken<GEMGeometry, MuonGeometryRecord> geomToken_;
+  edm::EDGetTokenT<GEMOHStatusCollection> m_gemOHStatusToken;
   /// The variables holding
   /// all OHStatus related information
 
